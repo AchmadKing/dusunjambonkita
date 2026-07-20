@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launching Soon - Web Dusun</title>
+    
+    <!-- Meta SEO -->
+    <meta name="description" content="Website Resmi Dusun sedang dalam proses pengembangan. Sesaat lagi kami akan segera meluncurkan portal informasi resmi ini. Mohon bersabar!">
+    <meta name="author" content="Kakak Programmer Ganteng Idaman">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&family=Playpen+Sans:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-gradient-glow"></div>
+    <div class="bg-circles">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Floating Glass Card -->
+        <div class="card animate-fade-in">
+            <!-- Header Badges -->
+            <div class="badge-container">
+                <span class="badge badge-pulse">
+                    <span class="dot"></span> Under Construction
+                </span>
+            </div>
+
+            <!-- Cat Image Section -->
+            <div class="cat-illustration-wrapper">
+                <div class="glow-ring"></div>
+                <img src="assets/cat_construction.png" alt="Kucing Konstruksi Ganteng" class="cat-img animate-float">
+            </div>
+
+            <!-- Message Section -->
+            <h1 class="main-title">Website Sedang Dikembangkan</h1>
+            <p class="subtitle">Website sedang dalam proses pengembangan, mohon bersabar <span class="emoji-smile">😊</span></p>
+
+            <!-- Countdown Timer Grid -->
+            <div class="countdown-grid" id="countdown">
+                <!-- Days Card -->
+                <div class="timer-card">
+                    <div class="timer-box">
+                        <span class="timer-number" id="days">00</span>
+                    </div>
+                    <span class="timer-label">Hari</span>
+                </div>
+
+                <!-- Hours Card -->
+                <div class="timer-card">
+                    <div class="timer-box">
+                        <span class="timer-number" id="hours">00</span>
+                    </div>
+                    <span class="timer-label">Jam</span>
+                </div>
+
+                <!-- Minutes Card -->
+                <div class="timer-card">
+                    <div class="timer-box">
+                        <span class="timer-number" id="minutes">00</span>
+                    </div>
+                    <span class="timer-label">Menit</span>
+                </div>
+
+                <!-- Seconds Card -->
+                <div class="timer-card">
+                    <div class="timer-box">
+                        <span class="timer-number" id="seconds">00</span>
+                    </div>
+                    <span class="timer-label">Detik</span>
+                </div>
+            </div>
+
+            <!-- Launch Date Announcement -->
+            <div class="target-date-alert">
+                <i class="fa-regular fa-calendar-check icon-calendar"></i>
+                <span>Estimasi Launching: <strong>24 Juli 2026, 23:59 WIB</strong></span>
+            </div>
+
+            <!-- Game Trigger Section -->
+            <div class="game-trigger-container">
+                <a href="game.html" id="openGameBtn" class="btn-play-game">
+                    <i class="fa-solid fa-gamepad game-icon animate-wiggle"></i>
+                    <span>Bosan Menunggu? Main Game Bima Jump! 🎮</span>
+                </a>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider"></div>
+
+            <!-- Signature Note Section -->
+            <footer>
+                <div class="signature-badge">
+                    <i class="fa-solid fa-code code-icon"></i>
+                    <span>note by <span class="designer-name">Kakak Programmer Ganteng Idaman</span></span>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Offline Banner Notification -->
+    <div id="offlineBanner" class="offline-banner">
+        <div class="offline-banner-content">
+            <div class="offline-banner-left">
+                <i class="fa-solid fa-wifi-slash offline-icon"></i>
+                <div class="offline-text-container">
+                    <h4>Koneksi Anda Terputus!</h4>
+                    <p>Sambil menunggu online kembali, Anda dapat memainkan Game Bima Jump!.</p>
+                </div>
+            </div>
+            <div class="offline-banner-right">
+                <a href="game.html" id="playOfflineBtn" class="play-offline-btn">Main Sekarang</a>
+                <button id="closeOfflineBtn" class="close-offline-btn">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
