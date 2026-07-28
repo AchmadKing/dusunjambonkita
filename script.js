@@ -441,7 +441,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        container.innerHTML = locations.map(loc => `
+        container.innerHTML = locations.map(loc => {
+            let gmapsUrl = loc.gmaps_url ? loc.gmaps_url.trim() : '';
+            let coordsVal = loc.coordinates ? loc.coordinates.trim() : '';
+
+            if (!gmapsUrl && coordsVal) {
+                const cleanCoords = coordsVal.replace(/\s+/g, '');
+                gmapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(cleanCoords)}`;
+            }
+
+            return `
             <div class="location-card" data-category="${loc.category}">
                 <div class="location-img-box" onclick="openImageModal('${loc.image_url || ''}', '${loc.title}')" title="Klik untuk perbesar foto">
                     <img src="${loc.image_url || ''}" alt="${loc.title}" class="location-img">
@@ -454,14 +463,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="location-desc">${loc.description}</p>
                     <div class="coordinate-info">
                         <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                        <span class="coord-val">${loc.coordinates}</span>
+                        <span class="coord-val">${coordsVal || 'Google Maps'}</span>
                     </div>
-                    <a href="${loc.gmaps_url}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
+                    <a href="${gmapsUrl || '#'}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
                         <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
                     </a>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         initLocationPills();
     }

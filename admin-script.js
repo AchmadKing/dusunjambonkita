@@ -891,13 +891,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         </select>
                     </div>
                     <div class="admin-form-group">
-                        <label>Koordinat Lat, Lng</label>
-                        <input type="text" id="mlCoords" class="admin-form-control" placeholder="-7.661971, 110.268369" required>
+                        <label>Koordinat Lat, Lng <small style="color: var(--admin-accent-blue);">(Opsional jika Link Gmaps diisi)</small></label>
+                        <input type="text" id="mlCoords" class="admin-form-control" placeholder="-7.661971, 110.268369">
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label>URL Google Maps</label>
-                    <input type="text" id="mlGmaps" class="admin-form-control" placeholder="https://www.google.com/maps?q=..." required>
+                    <label>URL Google Maps <small style="color: var(--admin-accent-blue);">(Opsional jika Koordinat diisi)</small></label>
+                    <input type="text" id="mlGmaps" class="admin-form-control" placeholder="https://www.google.com/maps?q=...">
+                    <small style="color: var(--admin-text-muted); display: block; margin-top: 4px;">
+                        *Wajib isi salah satu: Koordinat Lat, Lng ATAU URL Google Maps. Sistem akan otomatis membuatkan link Google Maps jika hanya mengisi koordinat.
+                    </small>
                 </div>
                 <div class="admin-form-group">
                     <label><i class="fa-solid fa-upload"></i> Upload Foto Lokasi (Supabase Storage)</label>
@@ -920,14 +923,37 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('formAddLokasi').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = parseInt(document.getElementById('mlId').value);
+            let coords = document.getElementById('mlCoords').value.trim();
+            let gmapsUrl = document.getElementById('mlGmaps').value.trim();
+
+            if (!coords && !gmapsUrl) {
+                alert('Harap isi salah satu: Koordinat Lat, Lng ATAU URL Google Maps!');
+                return;
+            }
+
+            // Opsi 1: Jika hanya mengisi koordinat, buat URL Google Maps otomatis
+            if (coords && !gmapsUrl) {
+                const cleanCoords = coords.replace(/\s+/g, '');
+                gmapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(cleanCoords)}`;
+            } 
+            // Opsi 2: Jika hanya mengisi URL Google Maps, ekstrak koordinat jika ada
+            else if (gmapsUrl && !coords) {
+                const match = gmapsUrl.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+                if (match) {
+                    coords = `${match[1]}, ${match[2]}`;
+                } else {
+                    coords = 'Lihat via Maps';
+                }
+            }
+
             const payload = {
                 id: id,
                 title: document.getElementById('mlTitle').value,
                 category: document.getElementById('mlCategory').value,
                 badge_label: document.getElementById('mlBadge').value,
                 badge_color: document.getElementById('mlColor').value,
-                coordinates: document.getElementById('mlCoords').value,
-                gmaps_url: document.getElementById('mlGmaps').value,
+                coordinates: coords,
+                gmaps_url: gmapsUrl,
                 image_url: document.getElementById('mlImg').value,
                 description: document.getElementById('mlDesc').value
             };
