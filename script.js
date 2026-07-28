@@ -614,11 +614,13 @@ document.addEventListener('DOMContentLoaded', () => {
         switchSection('beranda');
     }
 
-    // Initialize All Backend Data Loads directly from Supabase
-    loadBerandaData();
-    loadProfilData();
-    loadBeritaData();
-    loadAdministrasiData();
-    loadUmkmData();
-    loadKontakData();
+    // Initialize All Backend Data Loads directly from Supabase concurrently & non-blockingly
+    Promise.allSettled([
+        loadBerandaData(),
+        loadProfilData(),
+        loadBeritaData(),
+        loadAdministrasiData(),
+        loadUmkmData(),
+        loadKontakData()
+    ]).catch(err => console.warn('[Supabase Data Load]', err));
 });

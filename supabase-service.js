@@ -41,38 +41,54 @@ class DusunDataService {
     }
 
     // =========================================================================
-    // AUTHENTICATION (SUPABASE AUTH)
+    // AUTHENTICATION (SUPABASE AUTH & DEMO FALLBACK)
     // =========================================================================
     async loginAdmin(email, password) {
-        if (!this.isSupabaseConnected || !this.supabaseClient) {
-            throw new Error('Koneksi ke Supabase belum terhubung.');
+        if (this.isSupabaseConnected && this.supabaseClient) {
+            try {
+                const { data, error } = await this.supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (!error && data && data.user) {
+                    return { status: 'success', message: 'Login Supabase berhasil!', user: data.user, session: data.session };
+                }
+            } catch (err) {
+                console.warn('[Supabase Auth] Remote auth attempt failed, checking demo fallback:', err);
+            }
         }
 
-        const { data, error } = await this.supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
-        if (error) {
-            throw new Error(error.message || 'Email atau Password salah.');
+        // Demo Admin Credentials Fallback (admin@dusunjambon.id / admin123)
+        if ((email === 'admin@dusunjambon.id' || email === 'admin') && password === 'admin123') {
+            const demoSession = { user: { email: 'admin@dusunjambon.id', role: 'admin' }, token: 'demo_session_active' };
+            localStorage.setItem('dusun_admin_session', JSON.stringify(demoSession));
+            return { status: 'success', message: 'Login Demo Admin Berhasil!', user: demoSession.user, session: demoSession };
         }
 
-        return { status: 'success', message: 'Login berhasil!', user: data.user, session: data.session };
+        throw new Error('Email atau Password salah. (Gunakan Demo: admin@dusunjambon.id / admin123)');
     }
 
     async logoutAdmin() {
         if (this.isSupabaseConnected && this.supabaseClient) {
             try { await this.supabaseClient.auth.signOut(); } catch (e) { }
         }
+        localStorage.removeItem('dusun_admin_session');
         return true;
     }
 
     async getAdminSession() {
         if (this.isSupabaseConnected && this.supabaseClient) {
-            const { data, error } = await this.supabaseClient.auth.getSession();
-            if (!error && data && data.session) {
-                return data.session;
-            }
+            try {
+                const { data, error } = await this.supabaseClient.auth.getSession();
+                if (!error && data && data.session) {
+                    return data.session;
+                }
+            } catch (e) { }
+        }
+        const localSession = localStorage.getItem('dusun_admin_session');
+        if (localSession) {
+            try { return JSON.parse(localSession); } catch (e) { }
         }
         return null;
     }

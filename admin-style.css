@@ -618,6 +618,21 @@ textarea.admin-form-control {
     .admin-sidebar {
         width: 100%;
     }
+    .admin-topbar {
+        height: auto;
+        padding: 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .topbar-right {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
     .form-grid-2 {
         grid-template-columns: 1fr;
     }

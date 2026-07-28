@@ -137,7 +137,7 @@ button {
     background: rgba(6, 10, 19, 0.95);
 }
 
-.nav-container {
+.nav-container, .navbar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -164,21 +164,22 @@ button {
     box-shadow: 0 0 15px var(--accent-red-glow);
 }
 
-.brand-text {
+.brand-text, .brand-title-group {
     display: flex;
     flex-direction: column;
 }
 
-.brand-title {
+.brand-title, .brand-title-group h3 {
     font-family: var(--font-heading);
     font-weight: 800;
     font-size: 1.25rem;
     letter-spacing: -0.02em;
     color: #ffffff;
     white-space: nowrap;
+    margin: 0;
 }
 
-.brand-subtitle {
+.brand-subtitle, .brand-title-group span {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.55);
     letter-spacing: 0.05em;
@@ -189,7 +190,7 @@ button {
     gap: 6px;
 }
 
-.brand-subtitle::before {
+.brand-subtitle::before, .brand-title-group span::before {
     content: '';
     display: inline-block;
     width: 6px;
@@ -243,6 +244,35 @@ button {
     box-shadow: 0 0 10px var(--accent-red);
 }
 
+/* Navbar Action Buttons Container */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-admin-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(230, 57, 70, 0.15);
+    border: 1px solid rgba(230, 57, 70, 0.4);
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-admin-login:hover {
+    background: var(--accent-red);
+    color: #ffffff;
+    box-shadow: 0 0 15px var(--accent-red-glow);
+}
+
 /* Mobile Hamburger Button */
 .mobile-hamburger {
     display: none;
@@ -256,6 +286,7 @@ button {
     align-items: center;
     justify-content: center;
     transition: var(--transition-fast);
+    cursor: pointer;
 }
 
 .mobile-hamburger:hover {
@@ -264,13 +295,14 @@ button {
 }
 
 /* Mobile Sidebar Drawer Navigation */
+.sidebar-backdrop,
 .mobile-sidebar-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(6px);
     z-index: 1050;
     opacity: 0;
@@ -278,16 +310,19 @@ button {
     transition: var(--transition-normal);
 }
 
+.sidebar-backdrop.active,
 .mobile-sidebar-backdrop.active {
     opacity: 1;
     visibility: visible;
 }
 
+.sidebar-drawer,
 .mobile-sidebar-drawer {
     position: fixed;
     top: 0;
-    right: -320px;
+    right: -340px;
     width: 300px;
+    max-width: 85vw;
     height: 100vh;
     background: #090e1a;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
@@ -297,8 +332,10 @@ button {
     padding: 24px;
     transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
 }
 
+.sidebar-drawer.active,
 .mobile-sidebar-drawer.active {
     right: 0;
 }
@@ -317,11 +354,13 @@ button {
     height: 36px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.08);
+    border: none;
     color: #ffffff;
     font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     transition: var(--transition-fast);
 }
 
@@ -330,7 +369,8 @@ button {
     color: #fff;
 }
 
-.mobile-nav-menu {
+.mobile-nav-menu,
+.mobile-nav-links {
     list-style: none;
     display: flex;
     flex-direction: column;
@@ -347,6 +387,7 @@ button {
     color: rgba(255, 255, 255, 0.65);
     border-radius: var(--radius-md);
     transition: var(--transition-fast);
+    text-decoration: none;
 }
 
 .mobile-nav-link i {
@@ -1694,6 +1735,29 @@ button {
 }
 
 @media (max-width: 640px) {
+    .navbar-header {
+        height: 70px;
+    }
+
+    .brand-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .brand-title, .brand-title-group h3 {
+        font-size: 1.1rem;
+    }
+
+    .brand-subtitle, .brand-title-group span {
+        font-size: 0.68rem;
+    }
+
+    .btn-admin-login {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
     .hero-headline {
         font-size: 2.1rem;
     }
@@ -1714,6 +1778,17 @@ button {
 
     .footer-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-subtitle, .brand-title-group span {
+        display: none;
+    }
+
+    .btn-admin-login {
+        padding: 6px 10px;
+        font-size: 0.75rem;
     }
 }
 
