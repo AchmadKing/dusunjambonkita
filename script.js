@@ -209,43 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Trigger Service Request Modal
-    window.requestServiceModal = function(serviceName) {
-        const html = `
-            <form id="serviceForm" onsubmit="handleFormSubmit(event, 'Permohonan ${serviceName} berhasil dikirim!')">
-                <div class="form-group">
-                    <label class="form-label">Nama Lengkap Pemohon</label>
-                    <input type="text" class="form-input" placeholder="Masukkan nama sesuai KTP" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">NIK (Nomor Induk Kependudukan)</label>
-                    <input type="text" class="form-input" placeholder="16 Digit NIK" required pattern="[0-9]{16}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">RT / RW</label>
-                    <select class="form-select" required>
-                        <option value="">-- Pilih RT/RW --</option>
-                        <option value="RT 01 / RW 01">RT 01 / RW 01</option>
-                        <option value="RT 02 / RW 01">RT 02 / RW 01</option>
-                        <option value="RT 03 / RW 02">RT 03 / RW 02</option>
-                        <option value="RT 04 / RW 02">RT 04 / RW 02</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nomor WhatsApp / HP Active</label>
-                    <input type="tel" class="form-input" placeholder="08xxxxxxxxxx" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Keterangan / Keperluan Tambahan</label>
-                    <textarea class="form-textarea" placeholder="Tuliskan keperluan pengurusan surat secara rinci..."></textarea>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">
-                    <i class="fa-solid fa-paper-plane"></i> Kirim Permohonan
-                </button>
-            </form>
-        `;
-        openModal(`Pengajuan Surat: ${serviceName}`, html);
-    };
+
 
     // Trigger Image Modal (Lightbox View)
     window.openImageModal = function(imgSrc, caption) {
@@ -460,4 +424,167 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => toast.remove(), 350);
         }, 4000);
     }
+
+    // ----------------------------------------------------------------------
+    // 9. Dynamic Data Syncing with Supabase Data Service
+    // ----------------------------------------------------------------------
+    async function loadDynamicContent() {
+        if (!window.dusunService) return;
+
+        try {
+            // A. Render Beranda Content
+            const beranda = await window.dusunService.getBeranda();
+            if (beranda) {
+                const heroHeadline = document.querySelector('.hero-headline');
+                if (heroHeadline) {
+                    heroHeadline.innerHTML = `${beranda.hero_headline} <span>${beranda.hero_headline_span}</span> <span class="highlight-red">${beranda.hero_headline_red}</span>`;
+                }
+                const heroDesc = document.querySelector('.hero-desc');
+                if (heroDesc) heroDesc.textContent = beranda.hero_desc;
+
+                const heroImg = document.querySelector('.hero-main-img');
+                if (heroImg && beranda.hero_image_url) heroImg.src = beranda.hero_image_url;
+
+                const heroCap = document.querySelector('.hero-image-caption span');
+                if (heroCap && beranda.hero_image_caption) heroCap.textContent = beranda.hero_image_caption;
+
+                const speechCard = document.querySelector('#beranda .history-card');
+                if (speechCard) {
+                    const h3 = speechCard.querySelector('h3');
+                    if (h3 && beranda.kepala_dusun_title) h3.textContent = beranda.kepala_dusun_title;
+                    const pList = speechCard.querySelectorAll('p');
+                    if (pList.length >= 2) {
+                        pList[0].textContent = beranda.kepala_dusun_speech_1;
+                        pList[1].textContent = beranda.kepala_dusun_speech_2;
+                    }
+                    const nameDiv = speechCard.querySelector('div[style*="accent-red"]');
+                    if (nameDiv && beranda.kepala_dusun_name) nameDiv.textContent = `- ${beranda.kepala_dusun_name}`;
+                }
+            }
+
+            // B. Render Profil & Visi Misi
+            const profil = await window.dusunService.getProfil();
+            if (profil) {
+                const sejarahCard = document.querySelector('#profil .history-card');
+                if (sejarahCard) {
+                    const pList = sejarahCard.querySelectorAll('p');
+                    if (pList.length >= 2) {
+                        pList[0].textContent = profil.sejarah_p1;
+                        pList[1].textContent = profil.sejarah_p2;
+                    }
+                }
+                const visiBody = document.querySelector('.vm-card:not(.mission) .vm-body p');
+                if (visiBody && profil.visi_text) visiBody.textContent = `"${profil.visi_text}"`;
+
+                const misiUl = document.querySelector('.vm-card.mission .vm-body ul');
+                if (misiUl && Array.isArray(profil.misi_list)) {
+                    misiUl.innerHTML = profil.misi_list.map(m => `<li><i class="fa-solid fa-check"></i> ${m}</li>`).join('');
+                }
+            }
+
+            // C. Render Berita
+            const beritaList = await window.dusunService.getBerita();
+            const newsGrid = document.getElementById('newsGrid');
+            if (newsGrid && Array.isArray(beritaList) && beritaList.length > 0) {
+                newsGrid.innerHTML = beritaList.map(b => `
+                    <article class="news-card" data-category="${b.category}" data-title="${b.title}">
+                        <div class="news-img-box">
+                            ${b.image_url ? `<img src="${b.image_url}" alt="${b.title}" style="width: 100%; height: 100%; object-fit: cover;">` : `
+                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
+                                <span class="placeholder-tag">${b.category}</span>
+                                <div class="placeholder-icon"><i class="fa-solid fa-newspaper"></i></div>
+                                <h4 class="placeholder-title">${b.title}</h4>
+                            </div>`}
+                        </div>
+                        <div class="news-content">
+                            <div class="news-meta">
+                                <span><i class="fa-regular fa-calendar"></i> ${b.date_str}</span>
+                                <span><i class="fa-regular fa-user"></i> ${b.author || 'Pengurus Dusun'}</span>
+                            </div>
+                            <h3 class="news-title">${b.title}</h3>
+                            <p class="news-excerpt">${b.excerpt}</p>
+                            <div class="news-footer">
+                                <button class="btn-read-more" onclick="readNewsModal('${b.title.replace(/'/g, "\\'")}', '${b.date_str}', '${b.category}', '${b.content.replace(/'/g, "\\'")}')">
+                                    Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            // D. Render Administrasi Peta & Titik Lokasi
+            const peta = await window.dusunService.getAdministrasiPeta();
+            if (peta) {
+                const mapTitle = document.querySelector('.map-header-info h3');
+                if (mapTitle && peta.map_title) mapTitle.textContent = peta.map_title;
+                const mapDesc = document.querySelector('.map-header-info p');
+                if (mapDesc && peta.map_desc) mapDesc.textContent = peta.map_desc;
+                const mapImg = document.querySelector('.map-main-img');
+                if (mapImg && peta.map_image_url) mapImg.src = peta.map_image_url;
+            }
+
+            const lokasiList = await window.dusunService.getTitikLokasi();
+            const lokasiGrid = document.querySelector('.location-grid');
+            if (lokasiGrid && Array.isArray(lokasiList) && lokasiList.length > 0) {
+                lokasiGrid.innerHTML = lokasiList.map(l => `
+                    <div class="location-card" data-category="${l.category}">
+                        <div class="location-img-box" onclick="openImageModal('${l.image_url}', '${l.title.replace(/'/g, "\\'")}')">
+                            <img src="${l.image_url}" alt="${l.title}" class="location-img" onerror="this.src='assets/Masjid_Al-Falah.jpg'">
+                            <span class="location-badge ${l.badge_color || 'blue'}"><i class="fa-solid fa-location-dot"></i> ${l.badge_label || l.category}</span>
+                        </div>
+                        <div class="location-body">
+                            <h4 class="location-title">${l.title}</h4>
+                            <p class="location-desc">${l.description}</p>
+                            <div class="coordinate-info">
+                                <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
+                                <span class="coord-val">${l.coordinates}</span>
+                            </div>
+                            <a href="${l.gmaps_url}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
+                                <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // E. Render UMKM
+            const umkmList = await window.dusunService.getUMKM();
+            const umkmGrid = document.querySelector('.umkm-grid');
+            if (umkmGrid && Array.isArray(umkmList) && umkmList.length > 0) {
+                umkmGrid.innerHTML = umkmList.map(u => `
+                    <div class="umkm-card" data-category="${u.category}">
+                        <div class="umkm-img-box">
+                            ${u.image_url ? `<img src="${u.image_url}" alt="${u.title}" style="width: 100%; height: 100%; object-fit: cover;">` : `
+                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
+                                <span class="placeholder-tag">${u.category}</span>
+                                <div class="placeholder-icon"><i class="fa-solid fa-shop"></i></div>
+                                <h4 class="placeholder-title">${u.title}</h4>
+                            </div>`}
+                        </div>
+                        <div class="umkm-body">
+                            <span class="umkm-category-tag">${u.category}</span>
+                            <h3 class="umkm-title">${u.title}</h3>
+                            <div class="umkm-owner"><i class="fa-regular fa-user"></i> Pemilik: ${u.owner}</div>
+                            <p class="umkm-desc">${u.description}</p>
+                            <div class="umkm-footer">
+                                <div class="umkm-price">${u.price_str}</div>
+                                <a href="https://wa.me/${u.whatsapp.replace(/\+/g, '')}?text=Halo%20${encodeURIComponent(u.owner)},%20saya%20tertarik%20dengan%20${encodeURIComponent(u.title)}" target="_blank" class="btn-wa-order">
+                                    <i class="fa-brands fa-whatsapp"></i> Pesan WA
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+
+
+        } catch (err) {
+            console.error('[loadDynamicContent] Error:', err);
+        }
+    }
+
+    // Jalankan sync data dinamis saat halaman siap
+    loadDynamicContent();
 });

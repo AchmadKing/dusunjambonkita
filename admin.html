@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Portal Dusun Jambon</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+
+<body class="admin-body">
+
+    <!-- ==========================================================================
+         VIEW 1: ADMIN LOGIN PAGE
+         ========================================================================== -->
+    <div id="loginSection" class="login-wrapper">
+        <div class="login-card">
+            <div class="login-brand">
+                <div class="login-brand-icon">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <h2>Login Admin Dusun</h2>
+                <p>Portal Resmi Transparansi & Pengelolaan Dusun Jambon</p>
+            </div>
+
+            <form id="adminLoginForm" class="login-form">
+                <div class="form-group">
+                    <label>Username / Email Admin</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="text" id="loginUsername" placeholder="admin@dusunjambon.id" required value="admin@dusunjambon.id">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Kata Sandi (Password)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="••••••••" required value="admin123">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-admin-login">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk Ke Dashboard
+                </button>
+            </form>
+
+            <div class="demo-credentials-box">
+                <i class="fa-solid fa-circle-info"></i> <strong>Kredensial Demo Admin:</strong><br>
+                • Email: <code>admin@dusunjambon.id</code><br>
+                • Password: <code>admin123</code>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================================================
+         VIEW 2: ADMIN DASHBOARD PANEL
+         ========================================================================== -->
+    <div id="adminDashboardSection" class="admin-app-container" style="display: none;">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header-brand">
+                <div class="brand-icon-sm">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <div class="brand-title-group">
+                    <h3>Dusun Jambon</h3>
+                    <span>Panel Pengelola Admin</span>
+                </div>
+            </div>
+
+            <ul class="admin-nav-menu">
+                <li class="admin-nav-item">
+                    <a href="#tab-beranda" class="admin-nav-link active" data-tab="tab-beranda">
+                        <i class="fa-solid fa-house"></i> 1. Beranda
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#tab-profil" class="admin-nav-link" data-tab="tab-profil">
+                        <i class="fa-solid fa-id-card"></i> 2. Profil & Sejarah
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#tab-berita" class="admin-nav-link" data-tab="tab-berita">
+                        <i class="fa-solid fa-newspaper"></i> 3. Data Berita
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#tab-peta" class="admin-nav-link" data-tab="tab-peta">
+                        <i class="fa-solid fa-map-location-dot"></i> 4. Peta & Koordinat
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#tab-umkm" class="admin-nav-link" data-tab="tab-umkm">
+                        <i class="fa-solid fa-shop"></i> 5. Data UMKM
+                    </a>
+                </li>
+                <li class="admin-nav-item" style="margin-top: 15px; border-top: 1px dashed var(--admin-border); padding-top: 15px;">
+                    <a href="#tab-supabase" class="admin-nav-link" data-tab="tab-supabase" style="color: var(--admin-accent-green);">
+                        <i class="fa-solid fa-database"></i> Database Supabase
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-user-footer">
+                <div style="font-size: 0.82rem;">
+                    <div style="font-weight: 700; color: #fff;">Admin Perangkat</div>
+                    <div style="color: var(--admin-text-muted);">Sesi Aktif</div>
+                </div>
+                <button id="btnLogout" class="btn-admin-logout">
+                    <i class="fa-solid fa-power-off"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN AREA -->
+        <main class="admin-main-area">
+            <!-- TOPBAR -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <h2 id="currentTabTitle">Pengelolaan Halaman Beranda</h2>
+                </div>
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 16px;">
+                    <span id="dbStatusBadge" class="db-status-badge local">
+                        <i class="fa-solid fa-hard-drive"></i> Engine: LocalStorage Fallback
+                    </span>
+                    <a href="index.html" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none;">
+                        <i class="fa-solid fa-globe"></i> Lihat Website Utama
+                    </a>
+                </div>
+            </header>
+
+            <!-- CONTENT BODY -->
+            <div class="admin-content-body">
+
+                <!-- ==============================================================
+                     TAB 1: CRUD BERANDA
+                     ============================================================== -->
+                <div id="tab-beranda" class="admin-tab-panel active">
+                    <div class="panel-header-card">
+                        <div>
+                            <h3><i class="fa-solid fa-pen-to-square"></i> CRUD Gambar & Tulisan Halaman Beranda</h3>
+                            <p>Ubah judul hero banner, deskripsi sambutan, dan gambar utama pada halaman Beranda.</p>
+                        </div>
+                    </div>
+
+                    <form id="formBeranda" class="admin-form-card">
+                        <div class="form-grid-2">
+                            <div class="admin-form-group">
+                                <label>Tek Utama Hero (Sebelum Highlight)</label>
+                                <input type="text" id="berandaHeadline" class="admin-form-control" required>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Teks Span Tengah</label>
+                                <input type="text" id="berandaHeadlineSpan" class="admin-form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Teks Highlight Merah (Nama Dusun)</label>
+                            <input type="text" id="berandaHeadlineRed" class="admin-form-control" required>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Deskripsi Hero Banner</label>
+                            <textarea id="berandaDesc" class="admin-form-control" required></textarea>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-upload"></i> Upload / Pilih Gambar Utama Hero Banner</label>
+                            <input type="file" id="berandaHeroImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                            <input type="text" id="berandaHeroImg" class="admin-form-control" placeholder="assets/Masjid_Al-Falah.jpg atau Upload File" required>
+                            <div style="margin-top: 10px;">
+                                <img id="berandaHeroImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                            </div>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Keterangan / Caption Gambar Hero</label>
+                            <input type="text" id="berandaHeroCap" class="admin-form-control" required>
+                        </div>
+
+                        <hr style="border-color: var(--admin-border); margin: 24px 0;">
+
+                        <h4><i class="fa-solid fa-user-tie"></i> Sambutan Kepala Dusun</h4>
+
+                        <div class="admin-form-group">
+                            <label>Judul Sambutan</label>
+                            <input type="text" id="berandaKdTitle" class="admin-form-control" required>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-upload"></i> Upload / Pilih Foto Kepala Dusun (Opsional)</label>
+                            <input type="file" id="berandaKdImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                            <input type="text" id="berandaKdImg" class="admin-form-control" placeholder="URL atau Base64 Gambar Foto Kepala Dusun">
+                            <div style="margin-top: 10px;">
+                                <img id="berandaKdImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                            </div>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Isi Sambutan Paragraf 1</label>
+                            <textarea id="berandaKdSpeech1" class="admin-form-control" required></textarea>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Isi Sambutan Paragraf 2</label>
+                            <textarea id="berandaKdSpeech2" class="admin-form-control" required></textarea>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Nama & Jabatan Kepala Dusun</label>
+                            <input type="text" id="berandaKdName" class="admin-form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn-admin-submit">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan Beranda
+                        </button>
+                    </form>
+                </div>
+
+
+                <!-- ==============================================================
+                     TAB 2: CRUD PROFIL & SEJARAH
+                     ============================================================== -->
+                <div id="tab-profil" class="admin-tab-panel">
+                    <div class="panel-header-card">
+                        <div>
+                            <h3><i class="fa-solid fa-id-card"></i> CRUD Gambar & Tulisan Halaman Profil</h3>
+                            <p>Kelola teks Sejarah Dusun, Visi & Misi, serta Galeri Dokumentasi Foto.</p>
+                        </div>
+                    </div>
+
+                    <form id="formProfil" class="admin-form-card">
+                        <h4><i class="fa-solid fa-book-open"></i> Sejarah Dusun Jambon</h4>
+                        <div class="admin-form-group">
+                            <label>Sejarah Paragraf 1 (Asal-Usul Nama & Trah)</label>
+                            <textarea id="profilSejarah1" class="admin-form-control" required></textarea>
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Sejarah Paragraf 2 (Perkembangan Dusun)</label>
+                            <textarea id="profilSejarah2" class="admin-form-control" required></textarea>
+                        </div>
+
+                        <hr style="border-color: var(--admin-border); margin: 24px 0;">
+
+                        <h4><i class="fa-solid fa-bullseye"></i> Visi & Misi Dusun</h4>
+                        <div class="admin-form-group">
+                            <label>Teks Visi Dusun Jambon</label>
+                            <textarea id="profilVisi" class="admin-form-control" required></textarea>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label>Daftar Poin Misi (Pisahkan dengan baris baru / Enter)</label>
+                            <textarea id="profilMisi" class="admin-form-control" rows="4" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-admin-submit">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Data Profil
+                        </button>
+                    </form>
+
+                    <!-- Galeri & Slideshow List Table -->
+                    <div class="panel-header-card" style="margin-top: 30px;">
+                        <div>
+                            <h3><i class="fa-solid fa-images"></i> Galeri & Slideshow Foto Profil</h3>
+                            <p>Tambah, edit, atau hapus foto dokumentasi yang muncul di slideshow dan galeri profil.</p>
+                        </div>
+                        <button class="btn-admin-submit" onclick="openAddGalleryModal()">
+                            <i class="fa-solid fa-plus"></i> Tambah Foto Galeri
+                        </button>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Gambar</th>
+                                    <th>Judul / Caption</th>
+                                    <th>Tag / Kategori</th>
+                                    <th>Tipe Display</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profilGalleryTableBody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- ==============================================================
+                     TAB 3: CRUD BERITA DUSUN
+                     ============================================================== -->
+                <div id="tab-berita" class="admin-tab-panel">
+                    <div class="panel-header-card">
+                        <div>
+                            <h3><i class="fa-solid fa-newspaper"></i> CRUD Data Berita & Pengumuman Dusun</h3>
+                            <p>Kelola artikel berita, pengumuman publik, dan warta kegiatan pembangunan dusun.</p>
+                        </div>
+                        <button class="btn-admin-submit" onclick="openAddBeritaModal()">
+                            <i class="fa-solid fa-plus"></i> Tambah Berita Baru
+                        </button>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Judul Berita</th>
+                                    <th>Kategori</th>
+                                    <th>Tanggal</th>
+                                    <th>Penulis</th>
+                                    <th>Ringkasan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="beritaTableBody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- ==============================================================
+                     TAB 4: CRUD PETA & TITIK LOKASI GOOGLE MAPS
+                     ============================================================== -->
+                <div id="tab-peta" class="admin-tab-panel">
+                    <!-- Peta Administrasi Banner Section -->
+                    <div class="panel-header-card">
+                        <div>
+                            <h3><i class="fa-solid fa-map"></i> CRUD Gambar Peta Administrasi Dusun</h3>
+                            <p>Perbarui URL peta resmi wilayah administrasi Dusun Jambon.</p>
+                        </div>
+                    </div>
+
+                    <form id="formPeta" class="admin-form-card">
+                        <div class="admin-form-group">
+                            <label>Judul Peta Administrasi</label>
+                            <input type="text" id="petaTitle" class="admin-form-control" required>
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Deskripsi Peta</label>
+                            <textarea id="petaDesc" class="admin-form-control" required></textarea>
+                        </div>
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-upload"></i> Upload / Pilih Gambar Peta Administrasi</label>
+                            <input type="file" id="petaImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                            <input type="text" id="petaImgUrl" class="admin-form-control" placeholder="assets/PetaAdministrasiJambon.png atau Upload File" required>
+                            <div style="margin-top: 10px;">
+                                <img id="petaImgPreview" src="" style="max-height: 140px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-admin-submit">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Peta Administrasi
+                        </button>
+                    </form>
+
+                    <!-- Titik Lokasi Penting Table -->
+                    <div class="panel-header-card" style="margin-top: 30px;">
+                        <div>
+                            <h3><i class="fa-solid fa-location-dot"></i> CRUD Data Titik Lokasi Penting & Koordinat Google Maps</h3>
+                            <p>Tambah dan kelola direktori Masjid, Rumah RT, dan koordinat penting.</p>
+                        </div>
+                        <button class="btn-admin-submit" onclick="openAddLokasiModal()">
+                            <i class="fa-solid fa-plus"></i> Tambah Titik Lokasi
+                        </button>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Gambar</th>
+                                    <th>Nama Lokasi</th>
+                                    <th>Kategori / Badge</th>
+                                    <th>Koordinat Lat/Lng</th>
+                                    <th>Link Google Maps</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lokasiTableBody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- ==============================================================
+                     TAB 5: CRUD DATA UMKM DUSUN
+                     ============================================================== -->
+                <div id="tab-umkm" class="admin-tab-panel">
+                    <div class="panel-header-card">
+                        <div>
+                            <h3><i class="fa-solid fa-shop"></i> CRUD Data UMKM & Usaha Warga</h3>
+                            <p>Kelola katalog produk, harga, pemilik usaha, dan nomor WhatsApp pemesanan.</p>
+                        </div>
+                        <button class="btn-admin-submit" onclick="openAddUmkmAdminModal()">
+                            <i class="fa-solid fa-plus"></i> Tambah UMKM Baru
+                        </button>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Gambar</th>
+                                    <th>Nama UMKM</th>
+                                    <th>Pemilik</th>
+                                    <th>Kategori</th>
+                                    <th>Harga</th>
+                                    <th>No. WhatsApp</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="umkmTableBody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+
+
+                <!-- ==============================================================
+                     TAB 7: PENGATURAN DATABASE SUPABASE (POSTGRESQL)
+                     ============================================================== -->
+                <div id="tab-supabase" class="admin-tab-panel">
+                    <div class="panel-header-card">
+                        <div>
+                            <h3><i class="fa-solid fa-database"></i> Integration Settings: PostgreSQL via Supabase</h3>
+                            <p>Hubungkan website ke database Supabase Cloud PostgreSQL secara real-time.</p>
+                        </div>
+                    </div>
+
+                    <form id="formSupabase" class="admin-form-card">
+                        <div class="admin-form-group">
+                            <label>Supabase Project URL</label>
+                            <input type="url" id="supabaseUrl" class="admin-form-control" placeholder="https://xyzxyzxyz.supabase.co">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Supabase Anon / Public API Key</label>
+                            <input type="password" id="supabaseKey" class="admin-form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 20px;">
+                            <button type="submit" class="btn-admin-submit">
+                                <i class="fa-solid fa-plug"></i> Simpan & Hubungkan Supabase
+                            </button>
+                            <a href="supabase_schema.sql" download class="btn-secondary" style="padding: 10px 20px; font-weight: 700; border-radius: 10px; text-decoration: none;">
+                                <i class="fa-solid fa-file-code"></i> Unduh File PostgreSQL Schema (.sql)
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="admin-form-card">
+                        <h4><i class="fa-solid fa-circle-info"></i> Petunjuk Integrasi Supabase PostgreSQL:</h4>
+                        <ol style="color: var(--admin-text-muted); line-height: 1.8; font-size: 0.92rem; padding-left: 20px;">
+                            <li>Buka <a href="https://supabase.com" target="_blank" style="color: var(--admin-accent-blue);">Supabase Dashboard</a> dan buat project baru.</li>
+                            <li>Buka menu <strong>SQL Editor</strong> di dashboard Supabase Anda.</li>
+                            <li>Salin isi file <code>supabase_schema.sql</code> yang telah kami sediakan lalu jalankan di SQL Editor untuk secara otomatis membuat seluruh tabel & kolom database PostgreSQL.</li>
+                            <li>Buka <strong>Project Settings &gt; API</strong> di Supabase untuk mengambil <em>Project URL</em> dan <em>anon public key</em>.</li>
+                            <li>Masukkan kredensial ke form di atas lalu klik <strong>Simpan & Hubungkan Supabase</strong>.</li>
+                        </ol>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+
+    <!-- ==========================================================================
+         REUSABLE ADMIN CRUD MODAL
+         ========================================================================== -->
+    <div id="adminModalBackdrop" class="admin-modal-backdrop">
+        <div class="admin-modal-box">
+            <div class="admin-modal-header">
+                <h4 id="adminModalTitle">Judul Form Modal</h4>
+                <button class="btn-close-admin-modal" onclick="closeAdminModal()">&times;</button>
+            </div>
+            <div id="adminModalBody">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Client JS SDK & Data Service -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-service.js"></script>
+
+    <!-- Custom Admin JavaScript -->
+    <script src="admin-script.js"></script>
+</body>
+
+</html>
