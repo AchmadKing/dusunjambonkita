@@ -110,6 +110,9 @@ class DusunDataService {
             .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
         if (error) {
+            if (error.message && (error.message.includes('Bucket not found') || error.message.includes('not_found'))) {
+                throw new Error('Bucket "web_dusun_storage" belum dibuat di Supabase. Silakan jalankan skrip SQL storage di Supabase SQL Editor atau buat Bucket "web_dusun_storage" (Public) pada menu Storage di Dashboard Supabase.');
+            }
             throw new Error('Gagal unggah ke Supabase Storage: ' + error.message);
         }
 
@@ -317,7 +320,120 @@ class DusunDataService {
     }
 
     // =========================================================================
-    // 6. CRUD KONTAK DUSUN (kontak_content)
+    // 6. CRUD GAMBAR ISI BERITA (berita_images)
+    // =========================================================================
+    async getBeritaImages(beritaId) {
+        if (!this.isSupabaseConnected) return [];
+        const { data, error } = await this.supabaseClient
+            .from('berita_images')
+            .select('*')
+            .eq('berita_id', beritaId)
+            .order('sort_order', { ascending: true });
+        if (error) {
+            console.error('Error fetching berita_images:', error);
+            return [];
+        }
+        return data || [];
+    }
+
+    async saveBeritaImage(item) {
+        if (!this.isSupabaseConnected) throw new Error('Supabase Client disconnected');
+        if (item.id && item.id > 0) {
+            const { data, error } = await this.supabaseClient.from('berita_images').update(item).eq('id', item.id);
+            if (error) throw error;
+            return data;
+        } else {
+            delete item.id;
+            const { data, error } = await this.supabaseClient.from('berita_images').insert([item]);
+            if (error) throw error;
+            return data;
+        }
+    }
+
+    async deleteBeritaImage(id) {
+        if (!this.isSupabaseConnected) throw new Error('Supabase Client disconnected');
+        const { error } = await this.supabaseClient.from('berita_images').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    }
+
+    async deleteBeritaImagesByBeritaId(beritaId) {
+        if (!this.isSupabaseConnected) throw new Error('Supabase Client disconnected');
+        const { error } = await this.supabaseClient.from('berita_images').delete().eq('berita_id', beritaId);
+        if (error) throw error;
+        return true;
+    }
+
+    // =========================================================================
+    // 7. CRUD GAMBAR KATALOG UMKM (umkm_images)
+    // =========================================================================
+    async getUmkmImages(umkmId) {
+        if (!this.isSupabaseConnected) return [];
+        const { data, error } = await this.supabaseClient
+            .from('umkm_images')
+            .select('*')
+            .eq('umkm_id', umkmId)
+            .order('sort_order', { ascending: true });
+        if (error) {
+            console.error('Error fetching umkm_images:', error);
+            return [];
+        }
+        return data || [];
+    }
+
+    async saveUmkmImage(item) {
+        if (!this.isSupabaseConnected) throw new Error('Supabase Client disconnected');
+        if (item.id && item.id > 0) {
+            const { data, error } = await this.supabaseClient.from('umkm_images').update(item).eq('id', item.id);
+            if (error) throw error;
+            return data;
+        } else {
+            delete item.id;
+            const { data, error } = await this.supabaseClient.from('umkm_images').insert([item]);
+            if (error) throw error;
+            return data;
+        }
+    }
+
+    async deleteUmkmImage(id) {
+        if (!this.isSupabaseConnected) throw new Error('Supabase Client disconnected');
+        const { error } = await this.supabaseClient.from('umkm_images').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    }
+
+    async deleteUmkmImagesByUmkmId(umkmId) {
+        if (!this.isSupabaseConnected) throw new Error('Supabase Client disconnected');
+        const { error } = await this.supabaseClient.from('umkm_images').delete().eq('umkm_id', umkmId);
+        if (error) throw error;
+        return true;
+    }
+
+    // =========================================================================
+    // 8. SINGLE ITEM FETCH (Detail Pages)
+    // =========================================================================
+    async getBeritaById(id) {
+        if (!this.isSupabaseConnected) return null;
+        const { data, error } = await this.supabaseClient.from('berita').select('*').eq('id', id).single();
+        if (error) {
+            console.error('Error fetching berita by id:', error);
+            return null;
+        }
+        return data;
+    }
+
+    async getUmkmById(id) {
+        if (!this.isSupabaseConnected) return null;
+        const { data, error } = await this.supabaseClient.from('umkm').select('*').eq('id', id).single();
+        if (error) {
+            console.error('Error fetching umkm by id:', error);
+            return null;
+        }
+        return data;
+    }
+
+    // =========================================================================
+    // 9. CRUD KONTAK DUSUN (kontak_content)
     // =========================================================================
     async getKontak() {
         if (!this.isSupabaseConnected) return null;

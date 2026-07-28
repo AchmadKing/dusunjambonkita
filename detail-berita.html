@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Berita - Portal Resmi Dusun Jambon</title>
+    <meta name="description" content="Baca berita lengkap dari Portal Resmi Dusun Jambon.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css?v=1.2">
+</head>
+
+<body>
+    <!-- HEADER & NAVBAR -->
+    <header class="navbar-header">
+        <div class="container">
+            <div class="navbar-inner">
+                <a href="index.html#berita" class="nav-brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div class="brand-title-group">
+                        <h3>Dusun Jambon</h3>
+                        <span>Portal Resmi Informasi Dusun</span>
+                    </div>
+                </a>
+                <nav class="desktop-nav-menu">
+                    <a href="index.html#beranda" class="nav-link"><i class="fa-solid fa-house-chimney"></i> Beranda</a>
+                    <a href="index.html#profil" class="nav-link"><i class="fa-solid fa-id-card"></i> Profil & Sejarah</a>
+                    <a href="index.html#berita" class="nav-link active"><i class="fa-solid fa-newspaper"></i> Berita Dusun</a>
+                    <a href="index.html#administrasi" class="nav-link"><i class="fa-solid fa-map-location-dot"></i> Peta Administrasi</a>
+                    <a href="index.html#umkm" class="nav-link"><i class="fa-solid fa-shop"></i> Daftar UMKM</a>
+                    <a href="index.html#kontak" class="nav-link"><i class="fa-solid fa-address-book"></i> Kontak</a>
+                </nav>
+                <div class="navbar-actions">
+                    <a href="index.html#berita" class="btn-back-nav" style="text-decoration:none;">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-wrapper">
+        <section class="page-section active">
+            <!-- Loading State -->
+            <div id="detailLoading" class="detail-loading">
+                <div class="detail-loading-spinner">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Memuat detail berita...</p>
+                </div>
+            </div>
+
+            <!-- Detail Content (hidden until loaded) -->
+            <div id="detailContent" class="detail-page" style="display: none;">
+                <!-- Back Button -->
+                <div class="container">
+                    <a href="index.html#berita" class="detail-back-btn">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Berita
+                    </a>
+                </div>
+
+                <!-- Hero Header -->
+                <div class="detail-hero">
+                    <div class="container">
+                        <div class="detail-hero-meta">
+                            <span class="detail-category-badge" id="detailCategory">Kegiatan</span>
+                            <span class="detail-date"><i class="fa-regular fa-calendar"></i> <span id="detailDate">-</span></span>
+                            <span class="detail-author"><i class="fa-regular fa-user"></i> <span id="detailAuthor">-</span></span>
+                        </div>
+                        <h1 class="detail-title" id="detailTitle">Judul Berita</h1>
+                        <p class="detail-excerpt" id="detailExcerpt">Ringkasan berita...</p>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Image -->
+                <div class="container">
+                    <div class="detail-thumbnail" id="detailThumbnailWrapper">
+                        <img id="detailThumbnail" src="" alt="Gambar Berita">
+                    </div>
+                </div>
+
+                <!-- Content Body -->
+                <div class="container">
+                    <div class="detail-body">
+                        <div class="detail-content-text" id="detailContentText">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery / Slideshow Images -->
+                <div id="detailGallerySection" class="container" style="display: none;">
+                    <div class="detail-gallery-section">
+                        <h3 class="detail-gallery-title">
+                            <i class="fa-solid fa-images"></i> Dokumentasi Foto Berita
+                        </h3>
+
+                        <!-- Slideshow (if > 1 image) -->
+                        <div id="detailSlideshow" class="detail-slideshow" style="display: none;">
+                            <div class="detail-slideshow-track" id="detailSlideshowTrack">
+                                <!-- Slides injected dynamically -->
+                            </div>
+                            <button class="detail-slide-btn detail-slide-prev" id="detailSlidePrev">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button class="detail-slide-btn detail-slide-next" id="detailSlideNext">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                            <div class="detail-slide-dots" id="detailSlideDots">
+                                <!-- Dots injected dynamically -->
+                            </div>
+                            <div class="detail-slide-counter" id="detailSlideCounter">1 / 1</div>
+                        </div>
+
+                        <!-- Single Image (if = 1 image) -->
+                        <div id="detailSingleImage" class="detail-single-image" style="display: none;">
+                            <!-- Single image injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share / Actions -->
+                <div class="container">
+                    <div class="detail-actions">
+                        <a href="index.html#berita" class="btn-primary">
+                            <i class="fa-solid fa-newspaper"></i> Lihat Berita Lainnya
+                        </a>
+                        <button class="btn-secondary" onclick="window.history.back()">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="detailError" class="detail-error" style="display: none;">
+                <div class="detail-error-content">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <h3>Berita Tidak Ditemukan</h3>
+                    <p>Berita yang Anda cari tidak ditemukan atau telah dihapus.</p>
+                    <a href="index.html#berita" class="btn-primary">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Berita
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div>&copy; 2026 Dusun Jambon. Dibuat dengan transparansi & dedikasi untuk warga.</div>
+                <div>Portal Resmi Dusun Jambon</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Supabase Client JS SDK & Data Service -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-service.js?v=1.2"></script>
+
+    <!-- Detail Page Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const beritaId = parseInt(params.get('id'));
+
+        const loadingEl = document.getElementById('detailLoading');
+        const contentEl = document.getElementById('detailContent');
+        const errorEl = document.getElementById('detailError');
+
+        if (!beritaId) {
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+            return;
+        }
+
+        try {
+            // Fetch berita data
+            const berita = await window.dusunService.getBeritaById(beritaId);
+            if (!berita) {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            // Populate header info
+            document.title = `${berita.title} - Portal Dusun Jambon`;
+            document.getElementById('detailTitle').textContent = berita.title;
+            document.getElementById('detailCategory').textContent = berita.category;
+            document.getElementById('detailDate').textContent = berita.date_str;
+            document.getElementById('detailAuthor').textContent = berita.author;
+            document.getElementById('detailExcerpt').textContent = berita.excerpt;
+
+            // Thumbnail
+            const thumbWrapper = document.getElementById('detailThumbnailWrapper');
+            if (berita.image_url) {
+                document.getElementById('detailThumbnail').src = berita.image_url;
+                document.getElementById('detailThumbnail').alt = berita.title;
+            } else {
+                thumbWrapper.innerHTML = `
+                    <div class="placeholder-image-box" style="min-height: 300px;">
+                        <span class="placeholder-tag">${berita.category}</span>
+                        <div class="placeholder-icon"><i class="fa-regular fa-newspaper"></i></div>
+                        <h4 class="placeholder-title">${berita.title}</h4>
+                        <p class="placeholder-subtitle">Dokumentasi Berita Dusun Jambon</p>
+                    </div>
+                `;
+            }
+
+            // Content text
+            const contentText = document.getElementById('detailContentText');
+            contentText.innerHTML = berita.content.replace(/\n/g, '<br>');
+
+            // Fetch gallery images
+            const images = await window.dusunService.getBeritaImages(beritaId);
+            if (images && images.length > 0) {
+                const gallerySection = document.getElementById('detailGallerySection');
+                gallerySection.style.display = 'block';
+
+                if (images.length === 1) {
+                    // Single image
+                    const singleEl = document.getElementById('detailSingleImage');
+                    singleEl.style.display = 'block';
+                    singleEl.innerHTML = `
+                        <div class="detail-single-img-card">
+                            <img src="${images[0].image_url}" alt="${images[0].caption || 'Foto Berita'}">
+                            ${images[0].caption ? `<p class="detail-img-caption">${images[0].caption}</p>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // Slideshow
+                    const slideshowEl = document.getElementById('detailSlideshow');
+                    slideshowEl.style.display = 'block';
+
+                    const track = document.getElementById('detailSlideshowTrack');
+                    track.innerHTML = images.map((img, idx) => `
+                        <div class="detail-slide ${idx === 0 ? 'active' : ''}">
+                            <img src="${img.image_url}" alt="${img.caption || 'Foto ' + (idx + 1)}">
+                            ${img.caption ? `<div class="detail-slide-caption">${img.caption}</div>` : ''}
+                        </div>
+                    `).join('');
+
+                    const dotsEl = document.getElementById('detailSlideDots');
+                    dotsEl.innerHTML = images.map((_, idx) => `
+                        <span class="detail-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></span>
+                    `).join('');
+
+                    // Init slideshow controls
+                    initDetailSlideshow(images.length);
+                }
+            }
+
+            // Show content
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'block';
+
+        } catch (err) {
+            console.error('Error loading berita detail:', err);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+        }
+
+        // Sticky header
+        const navbarHeader = document.querySelector('.navbar-header');
+        window.addEventListener('scroll', () => {
+            if (navbarHeader) {
+                navbarHeader.classList.toggle('scrolled', window.scrollY > 30);
+            }
+        });
+    });
+
+    function initDetailSlideshow(total) {
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.detail-slide');
+        const dots = document.querySelectorAll('.detail-dot');
+        const counter = document.getElementById('detailSlideCounter');
+        const prevBtn = document.getElementById('detailSlidePrev');
+        const nextBtn = document.getElementById('detailSlideNext');
+
+        function showSlide(n) {
+            currentSlide = (n + total) % total;
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            if (counter) counter.textContent = `${currentSlide + 1} / ${total}`;
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        dots.forEach((dot, idx) => dot.addEventListener('click', () => showSlide(idx)));
+
+        // Auto-play slideshow every 5 seconds
+        setInterval(() => showSlide(currentSlide + 1), 5000);
+    }
+    </script>
+</body>
+
+</html>

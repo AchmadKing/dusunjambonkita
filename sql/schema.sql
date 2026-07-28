@@ -257,3 +257,22 @@ CREATE POLICY "Full Access Administrasi Peta" ON administrasi_peta FOR ALL USING
 CREATE POLICY "Full Access Titik Lokasi" ON titik_lokasi FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Full Access UMKM" ON umkm FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Full Access Kontak" ON kontak_content FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================================================
+-- 9. SUPABASE STORAGE BUCKET SETUP & POLICY (web_dusun_storage)
+-- ============================================================================
+-- Otomatis membuat storage bucket 'web_dusun_storage' dengan status Public
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('web_dusun_storage', 'web_dusun_storage', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Kebijakan Akses Baca & Upload Storage Publik
+DROP POLICY IF EXISTS "Public Read Storage" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Storage" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update Storage" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete Storage" ON storage.objects;
+
+CREATE POLICY "Public Read Storage" ON storage.objects FOR SELECT USING (bucket_id = 'web_dusun_storage');
+CREATE POLICY "Public Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'web_dusun_storage');
+CREATE POLICY "Public Update Storage" ON storage.objects FOR UPDATE USING (bucket_id = 'web_dusun_storage');
+CREATE POLICY "Public Delete Storage" ON storage.objects FOR DELETE USING (bucket_id = 'web_dusun_storage');

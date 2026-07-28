@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail UMKM - Portal Resmi Dusun Jambon</title>
+    <meta name="description" content="Detail produk UMKM dari warga Dusun Jambon.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css?v=1.2">
+</head>
+
+<body>
+    <!-- HEADER & NAVBAR -->
+    <header class="navbar-header">
+        <div class="container">
+            <div class="navbar-inner">
+                <a href="index.html#umkm" class="nav-brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div class="brand-title-group">
+                        <h3>Dusun Jambon</h3>
+                        <span>Portal Resmi Informasi Dusun</span>
+                    </div>
+                </a>
+                <nav class="desktop-nav-menu">
+                    <a href="index.html#beranda" class="nav-link"><i class="fa-solid fa-house-chimney"></i> Beranda</a>
+                    <a href="index.html#profil" class="nav-link"><i class="fa-solid fa-id-card"></i> Profil & Sejarah</a>
+                    <a href="index.html#berita" class="nav-link"><i class="fa-solid fa-newspaper"></i> Berita Dusun</a>
+                    <a href="index.html#administrasi" class="nav-link"><i class="fa-solid fa-map-location-dot"></i> Peta Administrasi</a>
+                    <a href="index.html#umkm" class="nav-link active"><i class="fa-solid fa-shop"></i> Daftar UMKM</a>
+                    <a href="index.html#kontak" class="nav-link"><i class="fa-solid fa-address-book"></i> Kontak</a>
+                </nav>
+                <div class="navbar-actions">
+                    <a href="index.html#umkm" class="btn-back-nav" style="text-decoration:none;">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-wrapper">
+        <section class="page-section active">
+            <!-- Loading State -->
+            <div id="detailLoading" class="detail-loading">
+                <div class="detail-loading-spinner">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Memuat detail UMKM...</p>
+                </div>
+            </div>
+
+            <!-- Detail Content -->
+            <div id="detailContent" class="detail-page" style="display: none;">
+                <!-- Back Button -->
+                <div class="container">
+                    <a href="index.html#umkm" class="detail-back-btn">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar UMKM
+                    </a>
+                </div>
+
+                <!-- Product Detail Layout -->
+                <div class="container">
+                    <div class="umkm-detail-grid">
+                        <!-- Left: Product Image / Slideshow -->
+                        <div class="umkm-detail-media">
+                            <!-- Main Thumbnail -->
+                            <div class="umkm-detail-thumb" id="umkmDetailThumb">
+                                <img id="umkmMainImage" src="" alt="Foto Produk">
+                            </div>
+
+                            <!-- Catalog Slideshow (if > 1 image) -->
+                            <div id="umkmSlideshow" class="detail-slideshow" style="display: none;">
+                                <div class="detail-slideshow-track" id="umkmSlideshowTrack">
+                                    <!-- Slides injected -->
+                                </div>
+                                <button class="detail-slide-btn detail-slide-prev" id="umkmSlidePrev">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button class="detail-slide-btn detail-slide-next" id="umkmSlideNext">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                                <div class="detail-slide-dots" id="umkmSlideDots"></div>
+                                <div class="detail-slide-counter" id="umkmSlideCounter">1 / 1</div>
+                            </div>
+
+                            <!-- Single Catalog Image -->
+                            <div id="umkmSingleImage" class="detail-single-image" style="display: none;"></div>
+                        </div>
+
+                        <!-- Right: Product Info -->
+                        <div class="umkm-detail-info">
+                            <span class="umkm-detail-category" id="umkmCategory">Kuliner</span>
+                            <h1 class="umkm-detail-title" id="umkmTitle">Nama UMKM</h1>
+
+                            <div class="umkm-detail-owner">
+                                <i class="fa-solid fa-user-tie"></i>
+                                <span>Pemilik: <strong id="umkmOwner">-</strong></span>
+                            </div>
+
+                            <div class="umkm-detail-price" id="umkmPrice">Rp -</div>
+
+                            <div class="umkm-detail-desc">
+                                <h4><i class="fa-solid fa-align-left"></i> Deskripsi Produk</h4>
+                                <p id="umkmDescription">-</p>
+                            </div>
+
+                            <div class="umkm-detail-actions">
+                                <a href="#" id="umkmWaBtn" target="_blank" class="btn-wa-order-detail">
+                                    <i class="fa-brands fa-whatsapp"></i> Pesan via WhatsApp
+                                </a>
+                                <a href="index.html#umkm" class="btn-secondary">
+                                    <i class="fa-solid fa-shop"></i> Lihat UMKM Lainnya
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catalog Gallery Title (shown if images exist) -->
+                <div id="umkmGallerySection" class="container" style="display: none;">
+                    <div class="detail-gallery-section">
+                        <h3 class="detail-gallery-title">
+                            <i class="fa-solid fa-images"></i> Katalog Foto Produk
+                        </h3>
+                        <div class="umkm-catalog-grid" id="umkmCatalogGrid">
+                            <!-- Catalog images injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="detailError" class="detail-error" style="display: none;">
+                <div class="detail-error-content">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <h3>UMKM Tidak Ditemukan</h3>
+                    <p>Produk UMKM yang Anda cari tidak ditemukan atau telah dihapus.</p>
+                    <a href="index.html#umkm" class="btn-primary">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar UMKM
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div>&copy; 2026 Dusun Jambon. Dibuat dengan transparansi & dedikasi untuk warga.</div>
+                <div>Portal Resmi Dusun Jambon</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Supabase Client JS SDK & Data Service -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-service.js?v=1.2"></script>
+
+    <!-- Detail Page Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const umkmId = parseInt(params.get('id'));
+
+        const loadingEl = document.getElementById('detailLoading');
+        const contentEl = document.getElementById('detailContent');
+        const errorEl = document.getElementById('detailError');
+
+        if (!umkmId) {
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+            return;
+        }
+
+        try {
+            const umkm = await window.dusunService.getUmkmById(umkmId);
+            if (!umkm) {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            // Populate data
+            document.title = `${umkm.title} - UMKM Dusun Jambon`;
+            document.getElementById('umkmTitle').textContent = umkm.title;
+            document.getElementById('umkmCategory').textContent = umkm.category;
+            document.getElementById('umkmOwner').textContent = umkm.owner;
+            document.getElementById('umkmPrice').textContent = umkm.price_str;
+            document.getElementById('umkmDescription').textContent = umkm.description;
+
+            // Thumbnail
+            const thumbEl = document.getElementById('umkmDetailThumb');
+            if (umkm.image_url) {
+                document.getElementById('umkmMainImage').src = umkm.image_url;
+                document.getElementById('umkmMainImage').alt = umkm.title;
+            } else {
+                thumbEl.innerHTML = `
+                    <div class="placeholder-image-box" style="min-height: 320px;">
+                        <span class="placeholder-tag">${umkm.category}</span>
+                        <div class="placeholder-icon"><i class="fa-solid fa-shop"></i></div>
+                        <h4 class="placeholder-title">${umkm.title}</h4>
+                        <p class="placeholder-subtitle">Produk UMKM Dusun Jambon</p>
+                    </div>
+                `;
+            }
+
+            // WhatsApp button
+            const waBtn = document.getElementById('umkmWaBtn');
+            const waMsg = encodeURIComponent(`Halo ${umkm.owner}, saya ingin pesan ${umkm.title}`);
+            waBtn.href = `https://wa.me/${umkm.whatsapp}?text=${waMsg}`;
+
+            // Fetch catalog images
+            const images = await window.dusunService.getUmkmImages(umkmId);
+            if (images && images.length > 0) {
+                // Show catalog gallery section
+                const gallerySection = document.getElementById('umkmGallerySection');
+                gallerySection.style.display = 'block';
+
+                // Build catalog grid
+                const catalogGrid = document.getElementById('umkmCatalogGrid');
+                catalogGrid.innerHTML = images.map(img => `
+                    <div class="umkm-catalog-card">
+                        <div class="umkm-catalog-img-box">
+                            <img src="${img.image_url}" alt="${img.caption || 'Katalog Produk'}">
+                        </div>
+                        ${img.caption ? `<p class="umkm-catalog-caption">${img.caption}</p>` : ''}
+                    </div>
+                `).join('');
+
+                if (images.length === 1) {
+                    // Single image below thumb
+                    const singleEl = document.getElementById('umkmSingleImage');
+                    singleEl.style.display = 'block';
+                    singleEl.innerHTML = `
+                        <div class="detail-single-img-card">
+                            <img src="${images[0].image_url}" alt="${images[0].caption || 'Katalog Produk'}">
+                            ${images[0].caption ? `<p class="detail-img-caption">${images[0].caption}</p>` : ''}
+                        </div>
+                    `;
+                } else if (images.length > 1) {
+                    // Slideshow
+                    const slideshowEl = document.getElementById('umkmSlideshow');
+                    slideshowEl.style.display = 'block';
+
+                    const track = document.getElementById('umkmSlideshowTrack');
+                    track.innerHTML = images.map((img, idx) => `
+                        <div class="detail-slide ${idx === 0 ? 'active' : ''}">
+                            <img src="${img.image_url}" alt="${img.caption || 'Katalog ' + (idx + 1)}">
+                            ${img.caption ? `<div class="detail-slide-caption">${img.caption}</div>` : ''}
+                        </div>
+                    `).join('');
+
+                    const dotsEl = document.getElementById('umkmSlideDots');
+                    dotsEl.innerHTML = images.map((_, idx) => `
+                        <span class="detail-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></span>
+                    `).join('');
+
+                    initUmkmSlideshow(images.length);
+                }
+            }
+
+            // Show content
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'block';
+
+        } catch (err) {
+            console.error('Error loading UMKM detail:', err);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+        }
+
+        // Sticky header
+        const navbarHeader = document.querySelector('.navbar-header');
+        window.addEventListener('scroll', () => {
+            if (navbarHeader) {
+                navbarHeader.classList.toggle('scrolled', window.scrollY > 30);
+            }
+        });
+    });
+
+    function initUmkmSlideshow(total) {
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('#umkmSlideshow .detail-slide');
+        const dots = document.querySelectorAll('#umkmSlideshow .detail-dot');
+        const counter = document.getElementById('umkmSlideCounter');
+        const prevBtn = document.getElementById('umkmSlidePrev');
+        const nextBtn = document.getElementById('umkmSlideNext');
+
+        function showSlide(n) {
+            currentSlide = (n + total) % total;
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            if (counter) counter.textContent = `${currentSlide + 1} / ${total}`;
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        dots.forEach((dot, idx) => dot.addEventListener('click', () => showSlide(idx)));
+
+        setInterval(() => showSlide(currentSlide + 1), 5000);
+    }
+    </script>
+</body>
+
+</html>

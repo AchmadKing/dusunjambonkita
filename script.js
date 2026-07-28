@@ -358,9 +358,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 class="news-title">${item.title}</h3>
                     <p class="news-excerpt">${item.excerpt}</p>
                     <div class="news-footer">
-                        <button class="btn-read-more" onclick="readNewsModal('${item.title.replace(/'/g, "\\'")}', '${item.date_str}', '${item.category}', '${item.content.replace(/'/g, "\\'").replace(/\n/g, "<br>")}', '${item.image_url}')">
+                        <a href="detail-berita.html?id=${item.id}" class="btn-read-more">
                             Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
             </article>
@@ -534,9 +534,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="umkm-desc">${item.description}</p>
                     <div class="umkm-footer">
                         <div class="umkm-price">${item.price_str}</div>
-                        <a href="https://wa.me/${item.whatsapp}?text=${encodeURIComponent('Halo ' + item.owner + ', saya ingin pesan ' + item.title)}" target="_blank" class="btn-wa-order">
-                            <i class="fa-brands fa-whatsapp"></i> Pesan WA
-                        </a>
+                        <div class="umkm-footer-actions">
+                            <a href="detail-umkm.html?id=${item.id}" class="btn-detail-umkm">
+                                <i class="fa-solid fa-eye"></i> Detail
+                            </a>
+                            <a href="https://wa.me/${item.whatsapp}?text=${encodeURIComponent('Halo ' + item.owner + ', saya ingin pesan ' + item.title)}" target="_blank" class="btn-wa-order">
+                                <i class="fa-brands fa-whatsapp"></i> Pesan
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

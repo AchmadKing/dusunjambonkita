@@ -517,6 +517,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label>Isi Lengkap Berita</label>
                     <textarea id="mbContent" class="admin-form-control" rows="5" required></textarea>
                 </div>
+
+                <hr style="border-color: var(--admin-border); margin: 24px 0;">
+
+                <div class="admin-form-group">
+                    <label style="font-size: 1.05rem; font-weight: 700;">
+                        <i class="fa-solid fa-images" style="color: var(--admin-accent-blue);"></i> Gambar Isi Berita (Multi Upload)
+                    </label>
+                    <p style="color: var(--admin-text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+                        Upload beberapa gambar untuk isi berita. Jika lebih dari 1, akan tampil sebagai slideshow otomatis.
+                    </p>
+                    <div id="mbMultiUploadList" class="multi-upload-list">
+                        <!-- Multi-upload items will be added here -->
+                    </div>
+                    <button type="button" class="btn-add-multi-upload" onclick="addBeritaImageSlot()">
+                        <i class="fa-solid fa-plus"></i> Tambah Foto Berita
+                    </button>
+                </div>
+
                 <button type="submit" class="btn-admin-submit"><i class="fa-solid fa-floppy-disk"></i> Simpan Berita</button>
             </form>
         `);
@@ -536,14 +554,163 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: document.getElementById('mbContent').value
             };
 
-            await window.dusunService.saveBerita(payload);
-            showAdminToast('Berita berhasil disimpan!');
-            closeAdminModal();
-            loadBeritaTab();
+            try {
+                // Save berita first
+                let savedBerita;
+                if (payload.id && payload.id > 0) {
+                    await window.dusunService.saveBerita(payload);
+                    savedBerita = { id: payload.id };
+                } else {
+                    delete payload.id;
+                    const { data, error } = await window.dusunService.supabaseClient
+                        .from('berita').insert([payload]).select('id').single();
+                    if (error) throw error;
+                    savedBerita = data;
+                }
+
+                const beritaId = savedBerita.id || payload.id;
+
+                // Save multi-upload images
+                if (beritaId) {
+                    await saveMultiUploadImages('berita', beritaId);
+                }
+
+                showAdminToast('Berita berhasil disimpan!');
+                closeAdminModal();
+                loadBeritaTab();
+            } catch (err) {
+                alert('Gagal menyimpan berita: ' + (err.message || err));
+            }
         });
     };
 
-    window.editBeritaModal = function (id, encodedObj) {
+    // Track multi-upload items
+    let beritaMultiUploadCounter = 0;
+    let beritaExistingImages = [];
+
+    window.addBeritaImageSlot = function () {
+        beritaMultiUploadCounter++;
+        const container = document.getElementById('mbMultiUploadList');
+        const slotId = `berita-upload-${beritaMultiUploadCounter}`;
+
+        const slotHtml = `
+            <div class="multi-upload-item" id="${slotId}" data-existing-id="0">
+                <div class="multi-upload-item-header">
+                    <span class="multi-upload-label"><i class="fa-solid fa-image"></i> Foto #${container.children.length + 1}</span>
+                    <button type="button" class="btn-remove-upload" onclick="removeMultiUploadSlot('${slotId}')">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
+                </div>
+                <div class="multi-upload-item-body">
+                    <input type="file" accept="image/*" class="admin-form-control multi-file-input" data-slot="${slotId}" style="padding: 8px; margin-bottom: 8px;">
+                    <input type="text" class="admin-form-control multi-url-input" placeholder="URL Gambar" data-slot="${slotId}">
+                    <div style="margin-top: 8px;">
+                        <img class="multi-img-preview" src="" style="max-height: 100px; border-radius: 8px; display: none; border: 1px solid var(--admin-border);">
+                    </div>
+                    <input type="text" class="admin-form-control multi-caption-input" placeholder="Keterangan / Caption gambar..." data-slot="${slotId}" style="margin-top: 8px;">
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', slotHtml);
+
+        // Bind file input for this slot
+        const slotEl = document.getElementById(slotId);
+        const fileInput = slotEl.querySelector('.multi-file-input');
+        const urlInput = slotEl.querySelector('.multi-url-input');
+        const previewImg = slotEl.querySelector('.multi-img-preview');
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.style.display = 'block';
+
+            try {
+                const uploadedUrl = await window.dusunService.uploadImageFile(file);
+                urlInput.value = uploadedUrl;
+                previewImg.src = uploadedUrl;
+                showAdminToast('Foto berhasil diunggah!');
+            } catch (err) {
+                alert('Gagal unggah: ' + (err.message || 'Error'));
+            }
+        });
+
+        urlInput.addEventListener('input', () => {
+            if (urlInput.value.trim()) {
+                previewImg.src = urlInput.value.trim();
+                previewImg.style.display = 'block';
+            } else {
+                previewImg.style.display = 'none';
+            }
+        });
+    };
+
+    window.removeMultiUploadSlot = function (slotId) {
+        const slot = document.getElementById(slotId);
+        if (slot) {
+            const existingId = parseInt(slot.getAttribute('data-existing-id'));
+            if (existingId > 0) {
+                // Mark for deletion
+                slot.setAttribute('data-deleted', 'true');
+                slot.style.display = 'none';
+            } else {
+                slot.remove();
+            }
+        }
+    };
+
+    async function saveMultiUploadImages(type, parentId) {
+        const listId = type === 'berita' ? 'mbMultiUploadList' : 'muMultiUploadList';
+        const container = document.getElementById(listId);
+        if (!container) return;
+
+        const slots = container.querySelectorAll('.multi-upload-item');
+        for (let i = 0; i < slots.length; i++) {
+            const slot = slots[i];
+            const existingId = parseInt(slot.getAttribute('data-existing-id') || '0');
+            const isDeleted = slot.getAttribute('data-deleted') === 'true';
+
+            if (isDeleted && existingId > 0) {
+                // Delete existing image
+                if (type === 'berita') {
+                    await window.dusunService.deleteBeritaImage(existingId);
+                } else {
+                    await window.dusunService.deleteUmkmImage(existingId);
+                }
+                continue;
+            }
+
+            if (isDeleted) continue;
+
+            const urlInput = slot.querySelector('.multi-url-input');
+            const captionInput = slot.querySelector('.multi-caption-input');
+            const imageUrl = urlInput ? urlInput.value.trim() : '';
+            const caption = captionInput ? captionInput.value.trim() : '';
+
+            if (!imageUrl) continue;
+
+            const imgPayload = {
+                image_url: imageUrl,
+                caption: caption,
+                sort_order: i
+            };
+
+            if (existingId > 0) {
+                imgPayload.id = existingId;
+            }
+
+            if (type === 'berita') {
+                imgPayload.berita_id = parentId;
+                await window.dusunService.saveBeritaImage(imgPayload);
+            } else {
+                imgPayload.umkm_id = parentId;
+                await window.dusunService.saveUmkmImage(imgPayload);
+            }
+        }
+    }
+
+    window.editBeritaModal = async function (id, encodedObj) {
         const b = JSON.parse(decodeURIComponent(encodedObj));
         openAddBeritaModal();
         document.getElementById('adminModalTitle').textContent = 'Edit Data Berita';
@@ -559,10 +726,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         document.getElementById('mbExcerpt').value = b.excerpt;
         document.getElementById('mbContent').value = b.content;
+
+        // Load existing multi-upload images
+        try {
+            const existingImages = await window.dusunService.getBeritaImages(b.id);
+            if (existingImages && existingImages.length > 0) {
+                existingImages.forEach(img => {
+                    beritaMultiUploadCounter++;
+                    const container = document.getElementById('mbMultiUploadList');
+                    const slotId = `berita-upload-${beritaMultiUploadCounter}`;
+                    const slotHtml = `
+                        <div class="multi-upload-item" id="${slotId}" data-existing-id="${img.id}">
+                            <div class="multi-upload-item-header">
+                                <span class="multi-upload-label"><i class="fa-solid fa-image"></i> Foto Existing #${container.children.length + 1}</span>
+                                <button type="button" class="btn-remove-upload" onclick="removeMultiUploadSlot('${slotId}')">
+                                    <i class="fa-solid fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                            <div class="multi-upload-item-body">
+                                <input type="file" accept="image/*" class="admin-form-control multi-file-input" data-slot="${slotId}" style="padding: 8px; margin-bottom: 8px;">
+                                <input type="text" class="admin-form-control multi-url-input" placeholder="URL Gambar" data-slot="${slotId}" value="${img.image_url}">
+                                <div style="margin-top: 8px;">
+                                    <img class="multi-img-preview" src="${img.image_url}" style="max-height: 100px; border-radius: 8px; display: block; border: 1px solid var(--admin-border);">
+                                </div>
+                                <input type="text" class="admin-form-control multi-caption-input" placeholder="Keterangan / Caption gambar..." data-slot="${slotId}" style="margin-top: 8px;" value="${img.caption || ''}">
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', slotHtml);
+
+                    // Bind file input for this existing slot
+                    const slotEl = document.getElementById(slotId);
+                    const fileInput = slotEl.querySelector('.multi-file-input');
+                    const urlInput = slotEl.querySelector('.multi-url-input');
+                    const previewImg = slotEl.querySelector('.multi-img-preview');
+
+                    fileInput.addEventListener('change', async (ev) => {
+                        const file = ev.target.files[0];
+                        if (!file) return;
+                        previewImg.src = URL.createObjectURL(file);
+                        previewImg.style.display = 'block';
+                        try {
+                            const uploadedUrl = await window.dusunService.uploadImageFile(file);
+                            urlInput.value = uploadedUrl;
+                            previewImg.src = uploadedUrl;
+                            showAdminToast('Foto berhasil diunggah!');
+                        } catch (err) {
+                            alert('Gagal unggah: ' + (err.message || 'Error'));
+                        }
+                    });
+
+                    urlInput.addEventListener('input', () => {
+                        if (urlInput.value.trim()) {
+                            previewImg.src = urlInput.value.trim();
+                            previewImg.style.display = 'block';
+                        } else {
+                            previewImg.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        } catch (err) {
+            console.error('Error loading existing berita images:', err);
+        }
     };
 
     window.deleteBeritaItem = async function (id) {
-        if (!confirm('Hapus berita ini?')) return;
+        if (!confirm('Hapus berita ini beserta semua gambar terkait?')) return;
         await window.dusunService.deleteBerita(id);
         showAdminToast('Berita dihapus');
         loadBeritaTab();
@@ -803,9 +1033,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label><i class="fa-solid fa-upload"></i> Upload Foto Produk UMKM (Supabase Storage)</label>
+                    <label><i class="fa-solid fa-upload"></i> Upload Thumbnail Produk UMKM (Supabase Storage)</label>
                     <input type="file" id="muImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
-                    <input type="text" id="muImg" class="admin-form-control" placeholder="URL Foto UMKM">
+                    <input type="text" id="muImg" class="admin-form-control" placeholder="URL Foto Thumbnail UMKM">
                     <div style="margin-top: 10px;">
                         <img id="muImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
                     </div>
@@ -814,6 +1044,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label>Deskripsi Produk UMKM</label>
                     <textarea id="muDesc" class="admin-form-control" rows="3" required></textarea>
                 </div>
+
+                <hr style="border-color: var(--admin-border); margin: 24px 0;">
+
+                <div class="admin-form-group">
+                    <label style="font-size: 1.05rem; font-weight: 700;">
+                        <i class="fa-solid fa-images" style="color: var(--admin-accent-green);"></i> Foto Katalog Produk (Multi Upload)
+                    </label>
+                    <p style="color: var(--admin-text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+                        Upload beberapa foto produk untuk katalog. Jika lebih dari 1, akan tampil sebagai slideshow di halaman detail.
+                    </p>
+                    <div id="muMultiUploadList" class="multi-upload-list">
+                        <!-- Multi-upload items will be added here -->
+                    </div>
+                    <button type="button" class="btn-add-multi-upload" onclick="addUmkmImageSlot()">
+                        <i class="fa-solid fa-plus"></i> Tambah Foto Katalog
+                    </button>
+                </div>
+
                 <button type="submit" class="btn-admin-submit"><i class="fa-solid fa-floppy-disk"></i> Simpan UMKM</button>
             </form>
         `);
@@ -833,14 +1081,95 @@ document.addEventListener('DOMContentLoaded', () => {
                 description: document.getElementById('muDesc').value
             };
 
-            await window.dusunService.saveUMKM(payload);
-            showAdminToast('UMKM berhasil disimpan!');
-            closeAdminModal();
-            loadUmkmTab();
+            try {
+                let savedUmkm;
+                if (payload.id && payload.id > 0) {
+                    await window.dusunService.saveUMKM(payload);
+                    savedUmkm = { id: payload.id };
+                } else {
+                    delete payload.id;
+                    const { data, error } = await window.dusunService.supabaseClient
+                        .from('umkm').insert([payload]).select('id').single();
+                    if (error) throw error;
+                    savedUmkm = data;
+                }
+
+                const umkmId = savedUmkm.id || payload.id;
+
+                // Save multi-upload images
+                if (umkmId) {
+                    await saveMultiUploadImages('umkm', umkmId);
+                }
+
+                showAdminToast('UMKM berhasil disimpan!');
+                closeAdminModal();
+                loadUmkmTab();
+            } catch (err) {
+                alert('Gagal menyimpan UMKM: ' + (err.message || err));
+            }
         });
     };
 
-    window.editUmkmModal = function (id, encodedObj) {
+    let umkmMultiUploadCounter = 0;
+
+    window.addUmkmImageSlot = function () {
+        umkmMultiUploadCounter++;
+        const container = document.getElementById('muMultiUploadList');
+        const slotId = `umkm-upload-${umkmMultiUploadCounter}`;
+
+        const slotHtml = `
+            <div class="multi-upload-item" id="${slotId}" data-existing-id="0">
+                <div class="multi-upload-item-header">
+                    <span class="multi-upload-label"><i class="fa-solid fa-image"></i> Katalog #${container.children.length + 1}</span>
+                    <button type="button" class="btn-remove-upload" onclick="removeMultiUploadSlot('${slotId}')">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
+                </div>
+                <div class="multi-upload-item-body">
+                    <input type="file" accept="image/*" class="admin-form-control multi-file-input" data-slot="${slotId}" style="padding: 8px; margin-bottom: 8px;">
+                    <input type="text" class="admin-form-control multi-url-input" placeholder="URL Gambar Katalog" data-slot="${slotId}">
+                    <div style="margin-top: 8px;">
+                        <img class="multi-img-preview" src="" style="max-height: 100px; border-radius: 8px; display: none; border: 1px solid var(--admin-border);">
+                    </div>
+                    <input type="text" class="admin-form-control multi-caption-input" placeholder="Keterangan produk / varian..." data-slot="${slotId}" style="margin-top: 8px;">
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', slotHtml);
+
+        const slotEl = document.getElementById(slotId);
+        const fileInput = slotEl.querySelector('.multi-file-input');
+        const urlInput = slotEl.querySelector('.multi-url-input');
+        const previewImg = slotEl.querySelector('.multi-img-preview');
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.style.display = 'block';
+
+            try {
+                const uploadedUrl = await window.dusunService.uploadImageFile(file);
+                urlInput.value = uploadedUrl;
+                previewImg.src = uploadedUrl;
+                showAdminToast('Foto katalog berhasil diunggah!');
+            } catch (err) {
+                alert('Gagal unggah: ' + (err.message || 'Error'));
+            }
+        });
+
+        urlInput.addEventListener('input', () => {
+            if (urlInput.value.trim()) {
+                previewImg.src = urlInput.value.trim();
+                previewImg.style.display = 'block';
+            } else {
+                previewImg.style.display = 'none';
+            }
+        });
+    };
+
+    window.editUmkmModal = async function (id, encodedObj) {
         const u = JSON.parse(decodeURIComponent(encodedObj));
         openAddUmkmAdminModal();
         document.getElementById('adminModalTitle').textContent = 'Edit Data UMKM';
@@ -856,10 +1185,72 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('muImgPreview').style.display = 'block';
         }
         document.getElementById('muDesc').value = u.description;
+
+        // Load existing catalog images
+        try {
+            const existingImages = await window.dusunService.getUmkmImages(u.id);
+            if (existingImages && existingImages.length > 0) {
+                existingImages.forEach(img => {
+                    umkmMultiUploadCounter++;
+                    const container = document.getElementById('muMultiUploadList');
+                    const slotId = `umkm-upload-${umkmMultiUploadCounter}`;
+                    const slotHtml = `
+                        <div class="multi-upload-item" id="${slotId}" data-existing-id="${img.id}">
+                            <div class="multi-upload-item-header">
+                                <span class="multi-upload-label"><i class="fa-solid fa-image"></i> Katalog Existing #${container.children.length + 1}</span>
+                                <button type="button" class="btn-remove-upload" onclick="removeMultiUploadSlot('${slotId}')">
+                                    <i class="fa-solid fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                            <div class="multi-upload-item-body">
+                                <input type="file" accept="image/*" class="admin-form-control multi-file-input" data-slot="${slotId}" style="padding: 8px; margin-bottom: 8px;">
+                                <input type="text" class="admin-form-control multi-url-input" placeholder="URL Gambar" data-slot="${slotId}" value="${img.image_url}">
+                                <div style="margin-top: 8px;">
+                                    <img class="multi-img-preview" src="${img.image_url}" style="max-height: 100px; border-radius: 8px; display: block; border: 1px solid var(--admin-border);">
+                                </div>
+                                <input type="text" class="admin-form-control multi-caption-input" placeholder="Keterangan produk / varian..." data-slot="${slotId}" style="margin-top: 8px;" value="${img.caption || ''}">
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', slotHtml);
+
+                    const slotEl = document.getElementById(slotId);
+                    const fileInput = slotEl.querySelector('.multi-file-input');
+                    const urlInput = slotEl.querySelector('.multi-url-input');
+                    const previewImg = slotEl.querySelector('.multi-img-preview');
+
+                    fileInput.addEventListener('change', async (ev) => {
+                        const file = ev.target.files[0];
+                        if (!file) return;
+                        previewImg.src = URL.createObjectURL(file);
+                        previewImg.style.display = 'block';
+                        try {
+                            const uploadedUrl = await window.dusunService.uploadImageFile(file);
+                            urlInput.value = uploadedUrl;
+                            previewImg.src = uploadedUrl;
+                            showAdminToast('Foto katalog berhasil diunggah!');
+                        } catch (err) {
+                            alert('Gagal unggah: ' + (err.message || 'Error'));
+                        }
+                    });
+
+                    urlInput.addEventListener('input', () => {
+                        if (urlInput.value.trim()) {
+                            previewImg.src = urlInput.value.trim();
+                            previewImg.style.display = 'block';
+                        } else {
+                            previewImg.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        } catch (err) {
+            console.error('Error loading existing UMKM images:', err);
+        }
     };
 
     window.deleteUmkmItem = async function (id) {
-        if (!confirm('Hapus UMKM ini?')) return;
+        if (!confirm('Hapus UMKM ini beserta semua foto katalog?')) return;
         await window.dusunService.deleteUMKM(id);
         showAdminToast('UMKM dihapus');
         loadUmkmTab();

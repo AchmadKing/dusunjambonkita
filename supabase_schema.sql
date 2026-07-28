@@ -170,6 +170,32 @@ INSERT INTO umkm (id, title, owner, category, price_str, whatsapp, description, 
 ON CONFLICT (id) DO NOTHING;
 
 
+-- 8. TABEL GAMBAR ISI BERITA (Multi Upload)
+CREATE TABLE IF NOT EXISTS berita_images (
+    id SERIAL PRIMARY KEY,
+    berita_id INTEGER NOT NULL REFERENCES berita(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    caption VARCHAR(255) DEFAULT '',
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_berita_images_berita_id ON berita_images(berita_id);
+
+
+-- 9. TABEL GAMBAR KATALOG UMKM (Multi Upload)
+CREATE TABLE IF NOT EXISTS umkm_images (
+    id SERIAL PRIMARY KEY,
+    umkm_id INTEGER NOT NULL REFERENCES umkm(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    caption VARCHAR(255) DEFAULT '',
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_umkm_images_umkm_id ON umkm_images(umkm_id);
+
+
 -- ============================================================================
 -- KEBIJAKAN ROW LEVEL SECURITY (RLS) SUPABASE
 -- Mengaktifkan RLS dan memberi izin AKSES BACA Publik & FULL AKSES Anon/Authenticated
@@ -182,6 +208,8 @@ ALTER TABLE berita ENABLE ROW LEVEL SECURITY;
 ALTER TABLE administrasi_peta ENABLE ROW LEVEL SECURITY;
 ALTER TABLE titik_lokasi ENABLE ROW LEVEL SECURITY;
 ALTER TABLE umkm ENABLE ROW LEVEL SECURITY;
+ALTER TABLE berita_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE umkm_images ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access on all tables
 CREATE POLICY "Public Read Beranda" ON beranda_content FOR SELECT USING (true);
@@ -191,6 +219,8 @@ CREATE POLICY "Public Read Berita" ON berita FOR SELECT USING (true);
 CREATE POLICY "Public Read Administrasi Peta" ON administrasi_peta FOR SELECT USING (true);
 CREATE POLICY "Public Read Titik Lokasi" ON titik_lokasi FOR SELECT USING (true);
 CREATE POLICY "Public Read UMKM" ON umkm FOR SELECT USING (true);
+CREATE POLICY "Public Read Berita Images" ON berita_images FOR SELECT USING (true);
+CREATE POLICY "Public Read UMKM Images" ON umkm_images FOR SELECT USING (true);
 
 -- Allow full write/update/insert/delete access
 CREATE POLICY "Full Access Beranda" ON beranda_content FOR ALL USING (true) WITH CHECK (true);
@@ -200,4 +230,25 @@ CREATE POLICY "Full Access Berita" ON berita FOR ALL USING (true) WITH CHECK (tr
 CREATE POLICY "Full Access Administrasi Peta" ON administrasi_peta FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Full Access Titik Lokasi" ON titik_lokasi FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Full Access UMKM" ON umkm FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Full Access Berita Images" ON berita_images FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Full Access UMKM Images" ON umkm_images FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================================================
+-- 10. SUPABASE STORAGE BUCKET SETUP & POLICY (web_dusun_storage)
+-- ============================================================================
+-- Otomatis membuat storage bucket 'web_dusun_storage' dengan status Public
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('web_dusun_storage', 'web_dusun_storage', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Kebijakan Akses Baca & Upload Storage Publik
+DROP POLICY IF EXISTS "Public Read Storage" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Storage" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update Storage" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete Storage" ON storage.objects;
+
+CREATE POLICY "Public Read Storage" ON storage.objects FOR SELECT USING (bucket_id = 'web_dusun_storage');
+CREATE POLICY "Public Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'web_dusun_storage');
+CREATE POLICY "Public Update Storage" ON storage.objects FOR UPDATE USING (bucket_id = 'web_dusun_storage');
+CREATE POLICY "Public Delete Storage" ON storage.objects FOR DELETE USING (bucket_id = 'web_dusun_storage');
 
