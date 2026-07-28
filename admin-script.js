@@ -3,7 +3,7 @@
  * ADMIN DASHBOARD SCRIPT - PORTAL DUSUN JAMBON
  * ============================================================================
  * Handles tab navigation, Supabase Auth, CRUD operations, image uploads 
- * directly via Supabase JS SDK (100% Client-Side, No PHP Dependency).
+ * directly via Supabase JS SDK (100% Client-Side, No LocalStorage DB).
  * ============================================================================
  */
 
@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Authentication Session Check & Login Handler (Supabase Auth)
     // ----------------------------------------------------------------------
     async function checkSession() {
-        const loggedIn = await window.dusunService.getAdminSession();
-        if (loggedIn) {
+        const session = await window.dusunService.getAdminSession();
+        if (session) {
             if (loginSection) loginSection.style.display = 'none';
             if (adminDashboardSection) adminDashboardSection.style.display = 'flex';
             updateDbBadge();
@@ -147,13 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateDbBadge() {
         if (!dbStatusBadge) return;
-        if (window.dusunService && window.dusunService.isSupabaseConnected) {
-            dbStatusBadge.className = 'db-status-badge supabase';
-            dbStatusBadge.innerHTML = `<i class="fa-solid fa-cloud"></i> Engine: PostgreSQL Supabase (Connected)`;
-        } else {
-            dbStatusBadge.className = 'db-status-badge local';
-            dbStatusBadge.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Engine: LocalStorage Engine`;
-        }
+        dbStatusBadge.className = 'db-status-badge supabase';
+        dbStatusBadge.innerHTML = `<i class="fa-solid fa-cloud"></i> Database: Supabase PostgreSQL`;
     }
 
     // ----------------------------------------------------------------------
@@ -282,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await window.dusunService.updateBeranda(payload);
-                showAdminToast('Halaman Beranda berhasil diperbarui!');
+                showAdminToast('Halaman Beranda berhasil diperbarui di Supabase!');
             } catch (err) {
                 alert('Gagal menyimpan beranda: ' + err.message);
             }
@@ -325,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await window.dusunService.updateProfil(payload);
-                showAdminToast('Data Profil berhasil diperbarui!');
+                showAdminToast('Data Profil berhasil diperbarui di Supabase!');
             } catch (err) {
                 alert('Gagal menyimpan profil: ' + err.message);
             }
@@ -595,7 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await window.dusunService.updateAdministrasiPeta(payload);
-                showAdminToast('Peta Administrasi berhasil diperbarui!');
+                showAdminToast('Peta Administrasi berhasil diperbarui di Supabase!');
             } catch (err) {
                 alert('Gagal menyimpan peta: ' + err.message);
             }
@@ -613,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = items.map(item => `
             <tr>
-                <td><img src="${item.image_url || 'assets/img/Masjid_Al-Falah.jpg'}" style="width: 45px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
+                <td><img src="${item.image_url || ''}" style="width: 45px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
                 <td><strong>${item.title}</strong></td>
                 <td><span class="admin-badge ${item.badge_color || 'blue'}">${item.badge_label || item.category}</span></td>
                 <td><code>${item.coordinates}</code></td>
@@ -751,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = items.map(item => `
             <tr>
-                <td><img src="${item.image_url || 'assets/img/Masjid_Al-Falah.jpg'}" style="width: 45px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
+                <td><img src="${item.image_url || ''}" style="width: 45px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
                 <td><strong>${item.title}</strong></td>
                 <td>${item.owner}</td>
                 <td><span class="admin-badge blue">${item.category}</span></td>
@@ -896,7 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await window.dusunService.updateKontak(payload);
-                showAdminToast('Informasi Kontak berhasil diperbarui!');
+                showAdminToast('Informasi Kontak berhasil diperbarui di Supabase!');
             } catch (err) {
                 alert('Gagal menyimpan kontak: ' + err.message);
             }

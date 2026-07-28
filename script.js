@@ -1,6 +1,7 @@
 /**
  * Dusun Jambon Official Portal - Main Public Script
  * Integrated Dynamic Data Fetching via Supabase JS SDK Service
+ * 100% Data berasal dari Supabase PostgreSQL Database (No Hardcoded Fallback / No LocalStorage DB)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -51,9 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ----------------------------------------------------------------------
-    // 2. Mobile Sidebar Drawer Logic
-    // ----------------------------------------------------------------------
+    // Mobile Sidebar Drawer Logic
     function openSidebar() {
         if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
         if (sidebarDrawer) sidebarDrawer.classList.add('active');
@@ -82,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------------------------
-    // 3. Modal Management System
+    // 2. Modal Management System
     // ----------------------------------------------------------------------
     const modalBackdrop = document.getElementById('modalBackdrop');
     const modalTitle = document.getElementById('modalTitle');
@@ -163,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ----------------------------------------------------------------------
-    // 4. Dynamic Data Fetching from Supabase JS SDK Service
+    // 3. Dynamic Data Fetching from Supabase JS SDK Service
     // ----------------------------------------------------------------------
 
     // Load Beranda Data
@@ -199,6 +198,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const kdSig = document.getElementById('kdSignatureDisplay');
                 if (kdSig && b.kepala_dusun_name) kdSig.textContent = `- ${b.kepala_dusun_name}`;
+
+                const kdImgContainer = document.getElementById('kdImageContainer');
+                if (kdImgContainer && b.kepala_dusun_image_url) {
+                    kdImgContainer.innerHTML = `<img src="${b.kepala_dusun_image_url}" alt="${b.kepala_dusun_name || 'Kepala Dusun'}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+                }
             }
         } catch (err) {
             console.error('Error loading beranda via Supabase SDK:', err);
@@ -329,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
 
         if (newsItems.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada berita ditemukan.</div>`;
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada berita ditemukan di database Supabase.</div>`;
             return;
         }
 
@@ -407,11 +411,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const petaImg = document.getElementById('petaMainImg');
                 if (petaImg && p.map_image_url) petaImg.src = p.map_image_url;
 
+                const btnDownload = document.getElementById('btnDownloadPeta');
+                if (btnDownload && p.map_image_url) btnDownload.href = p.map_image_url;
+
                 const btnZoom = document.getElementById('btnZoomPeta');
-                if (btnZoom) btnZoom.onclick = () => window.openImageModal(p.map_image_url, p.map_title);
+                if (btnZoom && p.map_image_url) btnZoom.onclick = () => window.openImageModal(p.map_image_url, p.map_title);
 
                 const imgWrapper = document.getElementById('petaImgWrapper');
-                if (imgWrapper) imgWrapper.onclick = () => window.openImageModal(p.map_image_url, p.map_title);
+                if (imgWrapper && p.map_image_url) imgWrapper.onclick = () => window.openImageModal(p.map_image_url, p.map_title);
             }
 
             const lokasi = await window.dusunService.getTitikLokasi();
@@ -429,10 +436,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('locationGrid');
         if (!container) return;
 
+        if (locations.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada titik lokasi terdaftar di Supabase.</div>`;
+            return;
+        }
+
         container.innerHTML = locations.map(loc => `
             <div class="location-card" data-category="${loc.category}">
-                <div class="location-img-box" onclick="openImageModal('${loc.image_url || 'assets/img/Masjid_Al-Falah.jpg'}', '${loc.title}')" title="Klik untuk perbesar foto">
-                    <img src="${loc.image_url || 'assets/img/Masjid_Al-Falah.jpg'}" alt="${loc.title}" class="location-img">
+                <div class="location-img-box" onclick="openImageModal('${loc.image_url || ''}', '${loc.title}')" title="Klik untuk perbesar foto">
+                    <img src="${loc.image_url || ''}" alt="${loc.title}" class="location-img">
                     <span class="location-badge ${loc.badge_color || 'blue'}">
                         <i class="fa-solid ${loc.category === 'ibadah' ? 'fa-mosque' : 'fa-house-user'}"></i> ${loc.badge_label || loc.category}
                     </span>
@@ -498,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
 
         if (umkmItems.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada UMKM terdaftar.</div>`;
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada UMKM terdaftar di Supabase.</div>`;
             return;
         }
 
@@ -589,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactForm) {
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            alert('Terima kasih! Pesan/Aspirasi Anda telah terkirim kepada Perangkat Dusun Jambon.');
+            alert('Terima kasih! Pesan/Aspirasi Anda telah terkirim.');
             contactForm.reset();
         });
     }
@@ -602,7 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchSection('beranda');
     }
 
-    // Initialize all Backend Data Loads via Supabase JS SDK
+    // Initialize All Backend Data Loads directly from Supabase
     loadBerandaData();
     loadProfilData();
     loadBeritaData();

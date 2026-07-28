@@ -5,23 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Resmi Dusun Jambon - Informasi & Transparansi Dusun</title>
-
-    <!-- Meta SEO -->
     <meta name="description"
-        content="Website Resmi Dusun Jambon. Informasi Peta Administrasi, Profil & Sejarah, Berita Dusun, Directory UMKM Warga, dan Kontak Pengurus.">
-    <meta name="keywords"
-        content="Dusun Jambon, Desa Jambon, Portal Dusun, Administrasi Dusun, UMKM Dusun, Berita Desa">
+        content="Portal Resmi Dusun Jambon menyajikan informasi publik, profil dusun, pengumuman berita, peta wilayah administrasi, serta direktori UMKM warga Dusun Jambon.">
+    <meta name="keywords" content="Dusun Jambon, Portal Dusun, Desa Karangtalun, Magelang, Peta Dusun, UMKM Jambon">
     <meta name="author" content="Pemerintah Dusun Jambon">
 
-    <!-- Google Fonts -->
+    <!-- Open Graph SEO Meta -->
+    <meta property="og:title" content="Portal Resmi Dusun Jambon - Informasi & Transparansi Dusun">
+    <meta property="og:description"
+        content="Website Resmi Dusun Jambon: Pusat informasi publik, berita warga, peta administrasi, dan katalog UMKM lokal.">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts: Inter & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- FontAwesome 6 Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome Icons 6.5.1 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="style.css">
@@ -30,106 +33,102 @@
 <body>
 
     <!-- ==========================================================================
-         TOP BAR HEADER (PC Topbar & Mobile Sidebar Drawer Toggle)
+         HEADER & NAVBAR SECTION
          ========================================================================== -->
     <header class="navbar-header">
-        <div class="container nav-container">
-            <!-- Brand Logo -->
-            <a href="#beranda" class="nav-brand nav-link" data-target="beranda">
-                <div class="brand-icon">
-                    <i class="fa-solid fa-building-columns"></i>
-                </div>
-                <div class="brand-text">
-                    <span class="brand-title">Dusun Jambon</span>
-                    <span class="brand-subtitle">Portal Resmi Dusun</span>
-                </div>
-            </a>
+        <div class="container">
+            <div class="navbar-inner">
+                <!-- Brand Logo & Title -->
+                <a href="#beranda" class="nav-brand nav-link" data-target="beranda">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div class="brand-title-group">
+                        <h3 id="brandTitleDisplay">Dusun Jambon</h3>
+                        <span id="brandSubtitleDisplay">Portal Resmi Informasi Dusun</span>
+                    </div>
+                </a>
 
-            <!-- Desktop Topbar Navigation Links (PC) -->
-            <ul class="desktop-nav-menu">
-                <li class="nav-item">
-                    <a href="#beranda" class="nav-link active" data-target="beranda">Beranda</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#profil" class="nav-link" data-target="profil">Profil</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#berita" class="nav-link" data-target="berita">Berita</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#administrasi" class="nav-link" data-target="administrasi">Administrasi</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#umkm" class="nav-link" data-target="umkm">Daftar UMKM</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#kontak" class="nav-link" data-target="kontak">Kontak</a>
-                </li>
-            </ul>
+                <!-- Desktop Navigation Menu -->
+                <nav class="desktop-nav-menu">
+                    <a href="#beranda" class="nav-link active" data-target="beranda">
+                        <i class="fa-solid fa-house-chimney"></i> Beranda
+                    </a>
+                    <a href="#profil" class="nav-link" data-target="profil">
+                        <i class="fa-solid fa-id-card"></i> Profil & Sejarah
+                    </a>
+                    <a href="#berita" class="nav-link" data-target="berita">
+                        <i class="fa-solid fa-newspaper"></i> Berita Dusun
+                    </a>
+                    <a href="#administrasi" class="nav-link" data-target="administrasi">
+                        <i class="fa-solid fa-map-location-dot"></i> Peta Administrasi
+                    </a>
+                    <a href="#umkm" class="nav-link" data-target="umkm">
+                        <i class="fa-solid fa-shop"></i> Daftar UMKM
+                    </a>
+                    <a href="#kontak" class="nav-link" data-target="kontak">
+                        <i class="fa-solid fa-address-book"></i> Kontak
+                    </a>
+                </nav>
 
-            <!-- Mobile Hamburger Toggle Button (HP) -->
-            <button id="mobileHamburger" class="mobile-hamburger" aria-label="Buka Menu Navigation">
-                <i class="fa-solid fa-bars-staggered"></i>
-            </button>
+                <!-- Navbar Action Button & Mobile Toggle -->
+                <div class="navbar-actions">
+                    <a href="admin.html" target="_blank" class="btn-admin-login" title="Login Pengurus Dusun">
+                        <i class="fa-solid fa-lock"></i> Login Admin
+                    </a>
+                    <button id="mobileHamburger" class="mobile-hamburger" aria-label="Buka Menu Navigasi">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- Mobile Sidebar Drawer Navigation (HP) -->
-    <div id="sidebarBackdrop" class="mobile-sidebar-backdrop"></div>
-    <aside id="sidebarDrawer" class="mobile-sidebar-drawer">
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+    <aside id="sidebarDrawer" class="sidebar-drawer">
         <div class="sidebar-header">
             <div class="nav-brand">
                 <div class="brand-icon">
                     <i class="fa-solid fa-building-columns"></i>
                 </div>
-                <div class="brand-text">
-                    <span class="brand-title">Dusun Jambon</span>
-                    <span class="brand-subtitle">Menu Navigation</span>
+                <div class="brand-title-group">
+                    <h3>Dusun Jambon</h3>
+                    <span>Portal Resmi Dusun</span>
                 </div>
             </div>
-            <button id="btnCloseSidebar" class="btn-close-sidebar" aria-label="Tutup Menu">
+            <button id="btnCloseSidebar" class="btn-close-sidebar" aria-label="Tutup Menu Sidebar">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <ul class="mobile-nav-menu">
-            <li>
-                <a href="#beranda" class="mobile-nav-link active" data-target="beranda">
-                    <i class="fa-solid fa-house"></i> Beranda
-                </a>
-            </li>
-            <li>
-                <a href="#profil" class="mobile-nav-link" data-target="profil">
-                    <i class="fa-solid fa-id-card"></i> Profil & Sejarah
-                </a>
-            </li>
-            <li>
-                <a href="#berita" class="mobile-nav-link" data-target="berita">
-                    <i class="fa-solid fa-newspaper"></i> Berita Dusun
-                </a>
-            </li>
-            <li>
-                <a href="#administrasi" class="mobile-nav-link" data-target="administrasi">
-                    <i class="fa-solid fa-file-signature"></i> Administrasi
-                </a>
-            </li>
-            <li>
-                <a href="#umkm" class="mobile-nav-link" data-target="umkm">
-                    <i class="fa-solid fa-store"></i> Daftar UMKM
-                </a>
-            </li>
-            <li>
-                <a href="#kontak" class="mobile-nav-link" data-target="kontak">
-                    <i class="fa-solid fa-phone"></i> Kontak Dusun
-                </a>
-            </li>
-        </ul>
-        <div class="sidebar-footer">
-            <p>&copy; 2026 Dusun Jambon. All Rights Reserved.</p>
-        </div>
+        <nav class="mobile-nav-links">
+            <a href="#beranda" class="mobile-nav-link active" data-target="beranda">
+                <i class="fa-solid fa-house-chimney"></i> Beranda
+            </a>
+            <a href="#profil" class="mobile-nav-link" data-target="profil">
+                <i class="fa-solid fa-id-card"></i> Profil & Sejarah
+            </a>
+            <a href="#berita" class="mobile-nav-link" data-target="berita">
+                <i class="fa-solid fa-newspaper"></i> Berita Dusun
+            </a>
+            <a href="#administrasi" class="mobile-nav-link" data-target="administrasi">
+                <i class="fa-solid fa-map-location-dot"></i> Peta Administrasi
+            </a>
+            <a href="#umkm" class="mobile-nav-link" data-target="umkm">
+                <i class="fa-solid fa-shop"></i> Daftar UMKM
+            </a>
+            <a href="#kontak" class="mobile-nav-link" data-target="kontak">
+                <i class="fa-solid fa-address-book"></i> Kontak
+            </a>
+            <div class="mobile-admin-divider"></div>
+            <a href="admin.html" target="_blank" class="btn-admin-login mobile-full-width">
+                <i class="fa-solid fa-lock"></i> Login Admin Portal
+            </a>
+        </nav>
     </aside>
 
     <!-- ==========================================================================
-         MAIN CONTENT AREA
+         MAIN CONTENT ROUTER AREA
          ========================================================================== -->
     <main class="main-wrapper">
 
@@ -148,12 +147,10 @@
                     <div class="hero-content-grid">
                         <div class="hero-text-area">
                             <h1 class="hero-headline">
-                                Selamat Datang <span>Di Portal Resmi</span> <span class="highlight-red">Dusun
-                                    Jambon</span>
+                                <!-- Dynamic via JS -->
                             </h1>
                             <p class="hero-desc">
-                                Portal Resmi Dusun Jambon memberikan informasi publik yang terbuka, efisien, dan
-                                transparan untuk kemajuan bersama warga Dusun Jambon.
+                                <!-- Dynamic via JS -->
                             </p>
                             <div class="hero-action-buttons">
                                 <a href="#administrasi" class="btn-primary hero-nav-btn" data-target="administrasi">
@@ -164,14 +161,12 @@
                                 </a>
                             </div>
                         </div>
-                        <!-- Hero Image: Masjid Al-Falah -->
                         <div class="hero-media-area">
                             <div class="hero-image-card">
-                                <img src="assets/Masjid_Al-Falah.jpg" alt="Masjid Al-Falah Dusun Jambon"
-                                    class="hero-main-img">
+                                <img src="" alt="Hero Dusun Jambon" class="hero-main-img">
                                 <div class="hero-image-caption">
                                     <i class="fa-solid fa-mosque"></i>
-                                    <span>Masjid Al-Falah — Dusun Jambon</span>
+                                    <span><!-- Dynamic via JS --></span>
                                 </div>
                             </div>
                         </div>
@@ -196,7 +191,7 @@
                             <i class="fa-solid fa-shop"></i>
                         </div>
                         <div class="stat-info">
-                            <div class="stat-value">9 Usaha</div>
+                            <div class="stat-value" id="berandaUmkmCountDisplay">-- Usaha</div>
                             <div class="stat-label">UMKM Warga Dusun</div>
                         </div>
                     </div>
@@ -206,26 +201,23 @@
             <!-- Sambutan Kepala Dusun -->
             <div class="container" style="margin-top: 40px;">
                 <div class="profile-content-grid">
-                    <div class="placeholder-image-box" style="height: 320px;">
+                    <div class="placeholder-image-box" style="height: 320px;" id="kdImageContainer">
                         <span class="placeholder-tag">Kepala Wilayah</span>
                         <div class="placeholder-icon">
                             <i class="fa-solid fa-user-tie"></i>
                         </div>
-                        <h3 class="placeholder-title">[Gambar] Kepala Wilayah Dusun Jambon</h3>
-                        <p class="placeholder-subtitle">Foto Resmi Bapak Kepala Wilayah Dusun Jambon</p>
+                        <h3 class="placeholder-title" id="kdNameDisplay">Kepala Wilayah Dusun Jambon</h3>
+                        <p class="placeholder-subtitle">Foto Resmi Kepala Wilayah Dusun Jambon</p>
                     </div>
                     <div class="history-card">
-                        <h3>Sambutan Kepala Wilayah Dusun Jambon</h3>
-                        <p>
-                            "Assalamu'alaikum Warahmatullahi Wabarakatuh. Selamat datang di portal digital resmi Dusun
-                            Jambon. Website ini kami hadirkan sebagai sarana transparansi publik, kemudahan akses
-                            administrasi perangkat desa, serta ajang promosi UMKM produk asli karya warga kami."
+                        <h3 id="kdTitleDisplay">Sambutan Kepala Wilayah Dusun Jambon</h3>
+                        <p id="kdSpeechDisplay1">
+                            <!-- Dynamic via JS -->
                         </p>
-                        <p>
-                            Kami mengajak seluruh lapisan warga Dusun Jambon untuk memanfaatkan fasilitas digital ini
-                            secara bijak demi kemajuan dan kesejahteraan bersama.
+                        <p id="kdSpeechDisplay2">
+                            <!-- Dynamic via JS -->
                         </p>
-                        <div style="margin-top: 20px; font-weight: 700; color: var(--accent-red);">
+                        <div style="margin-top: 20px; font-weight: 700; color: var(--accent-red);" id="kdSignatureDisplay">
                             - Kepala Wilayah Dusun Jambon
                         </div>
                     </div>
@@ -241,76 +233,27 @@
                 <div class="section-title-group">
                     <span class="section-tag"><i class="fa-solid fa-id-card"></i> Tentang Kami</span>
                     <h2 class="section-title">Profil & Sejarah Dusun Jambon</h2>
-                    <p class="section-subtitle">Mengenal lebih dekat asal-usul, visi misi, serta potensi wilayah Dusun
-                        Jambon.</p>
+                    <p class="section-subtitle">Mengenal lebih dekat asal-usul, visi misi, serta potensi wilayah Dusun Jambon.</p>
                 </div>
 
                 <div class="profile-content-grid">
                     <div class="history-card">
                         <h3>Sejarah Dusun Jambon</h3>
-                        <p>
-                            Dusun Jambon berdiri sejak puluhan tahun yang lalu, nama dusun Jambon diambil dari nama Mbah
-                            Kyai Syeikh Jambu Karang. "Jambu" diambil menjadi Jambon
-                            dan "Karang" diambil menjadi Karangtalun yang pada akhirya menjadi Dusun Jambon Desa
-                            Karangtalun. Hingga saat ini, terdapat banyak makam kyai dan pejuang dari era Pangeran
-                            Diponegoro yang masih tersimpan.
-                            Uniknya, kebanyakan warga Dusun Jambon masih satu silsilah atau trah sehingga bisa dibilang
-                            seluruh warga Dusun Jambon adalah saudara sedulur.
-
-                        <p>
-                            Seiring berjalannya waktu, Dusun Jambon berkembang menjadi wilayah yang berdaya, menjunjung
-                            tinggi nilai gotong royong, kebudayaan lokal, serta semangat inovasi di bidang pertanian dan
-                            kewirausahaan UMKM.
+                        <p id="profilSejarahDisplay1">
+                            <!-- Dynamic via JS -->
+                        </p>
+                        <p id="profilSejarahDisplay2">
+                            <!-- Dynamic via JS -->
                         </p>
                     </div>
                     <div class="slideshow-container" id="profileSejarahSlideshow">
-                        <div class="slideshow-wrapper">
-                            <div class="slide-item active">
-                                <img src="assets/kegiatan1.jpg" alt="Dokumen & Foto Asal-Usul Dusun - Kegiatan 1"
-                                    onclick="openImageModal('assets/kegiatan1.jpg', 'Dokumen & Foto Asal-Usul Dusun - Kegiatan 1')">
-                                <div class="slide-caption">
-                                    <span class="slide-tag"><i class="fa-solid fa-clock-rotate-left"></i> Sejarah &
-                                        Arsip</span>
-                                    <h4>Dokumen & Foto Asal-Usul Dusun (Kegiatan 1)</h4>
-                                </div>
-                            </div>
-                            <div class="slide-item">
-                                <img src="assets/kegiatan2.jpg" alt="Dokumen & Foto Asal-Usul Dusun - Kegiatan 2"
-                                    onclick="openImageModal('assets/kegiatan2.jpg', 'Dokumen & Foto Asal-Usul Dusun - Kegiatan 2')">
-                                <div class="slide-caption">
-                                    <span class="slide-tag"><i class="fa-solid fa-clock-rotate-left"></i> Sejarah &
-                                        Arsip</span>
-                                    <h4>Dokumen & Foto Asal-Usul Dusun (Kegiatan 2)</h4>
-                                </div>
-                            </div>
-                            <div class="slide-item">
-                                <img src="assets/kegiatan3.jpg" alt="Dokumen & Foto Asal-Usul Dusun - Kegiatan 3"
-                                    onclick="openImageModal('assets/kegiatan3.jpg', 'Dokumen & Foto Asal-Usul Dusun - Kegiatan 3')">
-                                <div class="slide-caption">
-                                    <span class="slide-tag"><i class="fa-solid fa-clock-rotate-left"></i> Sejarah &
-                                        Arsip</span>
-                                    <h4>Dokumen & Foto Asal-Usul Dusun (Kegiatan 3)</h4>
-                                </div>
-                            </div>
-                            <div class="slide-item">
-                                <img src="assets/kegiatan4.jpg" alt="Dokumen & Foto Asal-Usul Dusun - Kegiatan 4"
-                                    onclick="openImageModal('assets/kegiatan4.jpg', 'Dokumen & Foto Asal-Usul Dusun - Kegiatan 4')">
-                                <div class="slide-caption">
-                                    <span class="slide-tag"><i class="fa-solid fa-clock-rotate-left"></i> Sejarah &
-                                        Arsip</span>
-                                    <h4>Dokumen & Foto Asal-Usul Dusun (Kegiatan 4)</h4>
-                                </div>
-                            </div>
+                        <div class="slideshow-wrapper" id="profilSlideshowTrack">
+                            <!-- Slides Injected Dynamically via JS -->
                         </div>
-                        <button class="slide-btn slide-prev" id="slidePrevBtn" aria-label="Sebelumnya"><i
-                                class="fa-solid fa-chevron-left"></i></button>
-                        <button class="slide-btn slide-next" id="slideNextBtn" aria-label="Berikutnya"><i
-                                class="fa-solid fa-chevron-right"></i></button>
+                        <button class="slide-btn slide-prev" id="slidePrevBtn" aria-label="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="slide-btn slide-next" id="slideNextBtn" aria-label="Berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
                         <div class="slide-dots" id="slideDots">
-                            <span class="dot active" data-index="0"></span>
-                            <span class="dot" data-index="1"></span>
-                            <span class="dot" data-index="2"></span>
-                            <span class="dot" data-index="3"></span>
+                            <!-- Dots Injected Dynamically via JS -->
                         </div>
                     </div>
                 </div>
@@ -323,9 +266,8 @@
                             <h4>Visi Dusun Jambon</h4>
                         </div>
                         <div class="vm-body">
-                            <p>
-                                "Mewujudkan Dusun Jambon yang Mandiri, Sejahtera, Berbudaya, dan Terdepan dalam
-                                Pelayanan Publik Berbasis Teknologi Informas digital."
+                            <p id="profilVisiDisplay">
+                                <!-- Dynamic via JS -->
                             </p>
                         </div>
                     </div>
@@ -335,81 +277,20 @@
                             <h4>Misi Dusun Jambon</h4>
                         </div>
                         <div class="vm-body">
-                            <ul>
-                                <li><i class="fa-solid fa-check"></i> Meningkatkan kualitas pelayanan publik yang
-                                    transparan dan cepat.</li>
-                                <li><i class="fa-solid fa-check"></i> Mengembangkan potensi ekonomi lokal melalui
-                                    pemberdayaan UMKM.</li>
-                                <li><i class="fa-solid fa-check"></i> Memperkuat semangat gotong royong dan kelestarian
-                                    lingkungan hidup.</li>
+                            <ul id="profilMisiDisplay">
+                                <!-- Dynamic via JS -->
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- Galeri Foto Dusun (Placeholder Grid) -->
+                <!-- Galeri Foto Dusun Grid -->
                 <div style="margin-top: 60px;">
-                    <h3
-                        style="font-family: var(--font-heading); font-size: 1.75rem; margin-bottom: 24px; text-align: center;">
+                    <h3 style="font-family: var(--font-heading); font-size: 1.75rem; margin-bottom: 24px; text-align: center;">
                         Galeri Dokumentasi Dusun Jambon
                     </h3>
-                    <div class="gallery-grid">
-                        <div class="gallery-card"
-                            onclick="openImageModal('assets/kegiatan1.jpg', 'Dokumentasi Kegiatan Dusun 1')">
-                            <div class="gallery-img-box">
-                                <img src="assets/kegiatan1.jpg" alt="Dokumentasi Kegiatan Dusun 1">
-                                <div class="gallery-overlay">
-                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
-                                </div>
-                            </div>
-                            <div class="gallery-info">
-                                <span class="gallery-tag">Kegiatan 1</span>
-                                <h4 class="gallery-title">Dokumentasi Kegiatan 1</h4>
-                                <p class="gallery-subtitle">Dokumentasi Kegiatan Warga Dusun Jambon</p>
-                            </div>
-                        </div>
-                        <div class="gallery-card"
-                            onclick="openImageModal('assets/kegiatan2.jpg', 'Dokumentasi Kegiatan Dusun 2')">
-                            <div class="gallery-img-box">
-                                <img src="assets/kegiatan2.jpg" alt="Dokumentasi Kegiatan Dusun 2">
-                                <div class="gallery-overlay">
-                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
-                                </div>
-                            </div>
-                            <div class="gallery-info">
-                                <span class="gallery-tag">Kegiatan 2</span>
-                                <h4 class="gallery-title">Dokumentasi Kegiatan 2</h4>
-                                <p class="gallery-subtitle">Dokumentasi Kegiatan Warga Dusun Jambon</p>
-                            </div>
-                        </div>
-                        <div class="gallery-card"
-                            onclick="openImageModal('assets/kegiatan3.jpg', 'Dokumentasi Kegiatan Dusun 3')">
-                            <div class="gallery-img-box">
-                                <img src="assets/kegiatan3.jpg" alt="Dokumentasi Kegiatan Dusun 3">
-                                <div class="gallery-overlay">
-                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
-                                </div>
-                            </div>
-                            <div class="gallery-info">
-                                <span class="gallery-tag">Kegiatan 3</span>
-                                <h4 class="gallery-title">Dokumentasi Kegiatan 3</h4>
-                                <p class="gallery-subtitle">Dokumentasi Kegiatan Warga Dusun Jambon</p>
-                            </div>
-                        </div>
-                        <div class="gallery-card"
-                            onclick="openImageModal('assets/kegiatan4.jpg', 'Dokumentasi Kegiatan Dusun 4')">
-                            <div class="gallery-img-box">
-                                <img src="assets/kegiatan4.jpg" alt="Dokumentasi Kegiatan Dusun 4">
-                                <div class="gallery-overlay">
-                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
-                                </div>
-                            </div>
-                            <div class="gallery-info">
-                                <span class="gallery-tag">Kegiatan 4</span>
-                                <h4 class="gallery-title">Dokumentasi Kegiatan 4</h4>
-                                <p class="gallery-subtitle">Dokumentasi Kegiatan Warga Dusun Jambon</p>
-                            </div>
-                        </div>
+                    <div class="gallery-grid" id="profilGalleryGrid">
+                        <!-- Dynamic via JS -->
                     </div>
                 </div>
             </div>
@@ -423,16 +304,14 @@
                 <div class="section-title-group">
                     <span class="section-tag"><i class="fa-solid fa-newspaper"></i> Informasi Terbaru</span>
                     <h2 class="section-title">Berita & Pengumuman Dusun</h2>
-                    <p class="section-subtitle">Dapatkan info kabar terkini seputar kegiatan, pembangunan, dan
-                        pengumuman Dusun Jambon.</p>
+                    <p class="section-subtitle">Dapatkan info kabar terkini seputar kegiatan, pembangunan, dan pengumuman Dusun Jambon.</p>
                 </div>
 
-                <!-- Search & Category Filter -->
+                <!-- Search & Category Filter Bar -->
                 <div class="filter-search-bar">
                     <div class="search-box-wrapper">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="newsSearchInput" class="search-input"
-                            placeholder="Cari judul berita atau kegiatan...">
+                        <input type="text" id="newsSearchInput" class="search-input" placeholder="Cari judul berita atau kegiatan...">
                     </div>
                     <div class="category-pills">
                         <button class="pill-btn news-pill active" data-category="all">Semua Berita</button>
@@ -442,96 +321,9 @@
                     </div>
                 </div>
 
-                <!-- News Grid Cards -->
+                <!-- News Grid Container -->
                 <div class="news-grid" id="newsGrid">
-
-                    <!-- News 1 -->
-                    <article class="news-card" data-category="kegiatan"
-                        data-title="Kerja Bakti Massal Sambut Musim Hujan di Dusun Jambon">
-                        <div class="news-img-box">
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">Kegiatan</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-person-digging"></i></div>
-                                <h4 class="placeholder-title">[Gambar] Gotong Royong Warga</h4>
-                            </div>
-                        </div>
-                        <div class="news-content">
-                            <div class="news-meta">
-                                <span><i class="fa-regular fa-calendar"></i> 24 Juli 2026</span>
-                                <span><i class="fa-regular fa-user"></i> Sekretaris Dusun</span>
-                            </div>
-                            <h3 class="news-title">Kerja Bakti Massal Sambut Musim Hujan di Dusun Jambon</h3>
-                            <p class="news-excerpt">
-                                Seluruh warga dari RT 01 hingga RT 08 kompak melaksanakan gotong royong membersihkan
-                                selokan dan drainase desa...
-                            </p>
-                            <div class="news-footer">
-                                <button class="btn-read-more"
-                                    onclick="readNewsModal('Kerja Bakti Massal Sambut Musim Hujan', '24 Juli 2026', 'Kegiatan Warga', 'Seluruh warga Dusun Jambon menunjukkan kebersamaan yang tinggi dalam kegiatan kerja bakti pembersihan saluran air guna mencegah genangan air saat musim hujan mendatang.')">
-                                    Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- News 2 -->
-                    <article class="news-card" data-category="pembangunan"
-                        data-title="Pengaspalan Jalan Utama Dusun Selesai 100 Persen">
-                        <div class="news-img-box">
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">Pembangunan</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-road"></i></div>
-                                <h4 class="placeholder-title">[Gambar] Pembangunan Jalan Dusun</h4>
-                            </div>
-                        </div>
-                        <div class="news-content">
-                            <div class="news-meta">
-                                <span><i class="fa-regular fa-calendar"></i> 20 Juli 2026</span>
-                                <span><i class="fa-regular fa-user"></i> Tim Pembangunan</span>
-                            </div>
-                            <h3 class="news-title">Pengaspalan Jalan Utama Dusun Selesai 100%</h3>
-                            <p class="news-excerpt">
-                                Akses transportasi warga kini semakin lancar dan aman berkat selesainya proyek perbaikan
-                                jalan sepanjang 1.2 KM...
-                            </p>
-                            <div class="news-footer">
-                                <button class="btn-read-more"
-                                    onclick="readNewsModal('Pengaspalan Jalan Utama Dusun Selesai 100%', '20 Juli 2026', 'Pembangunan', 'Proyek pengaspalan jalan utama Dusun Jambon telah rampung sepenuhnya. Hal ini diharapkan mampu meningkatkan percepatan roda ekonomi dan aksesibilitas hasil panen petani setempat.')">
-                                    Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- News 3 -->
-                    <article class="news-card" data-category="pengumuman"
-                        data-title="Pelatihan Digital Marketing Gratis Untuk Pelaku UMKM">
-                        <div class="news-img-box">
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">Pengumuman</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-laptop-code"></i></div>
-                                <h4 class="placeholder-title">[Gambar] Pelatihan UMKM Digital</h4>
-                            </div>
-                        </div>
-                        <div class="news-content">
-                            <div class="news-meta">
-                                <span><i class="fa-regular fa-calendar"></i> 18 Juli 2026</span>
-                                <span><i class="fa-regular fa-user"></i> Pengurus UMKM</span>
-                            </div>
-                            <h3 class="news-title">Pelatihan Digital Marketing Gratis Untuk Pelaku UMKM</h3>
-                            <p class="news-excerpt">
-                                Diumumkan kepada seluruh pemilik UMKM Dusun Jambon untuk menghadiri workshop promosi
-                                produk via sosial media & marketplace...
-                            </p>
-                            <div class="news-footer">
-                                <button class="btn-read-more"
-                                    onclick="readNewsModal('Pelatihan Digital Marketing Gratis Untuk Pelaku UMKM', '18 Juli 2026', 'Pengumuman', 'Pemerintah Dusun Jambon bekerjasama dengan akademisi menyelenggarakan pelatihan pemasaran digital agar produk lokal warga dapat menjangkau pasar nasional.')">
-                                    Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-
+                    <!-- Dynamic via JS -->
                 </div>
             </div>
         </section>
@@ -542,212 +334,55 @@
         <section id="administrasi" class="page-section">
             <div class="container">
                 <div class="section-title-group">
-                    <span class="section-tag"><i class="fa-solid fa-map-location-dot"></i> Peta Wilayah & Titik
-                        Lokasi</span>
+                    <span class="section-tag"><i class="fa-solid fa-map-location-dot"></i> Peta Wilayah & Titik Lokasi</span>
                     <h2 class="section-title">Peta Administrasi Dusun Jambon</h2>
-                    <p class="section-subtitle">Wilayah administrasi Dusun Jambon beserta direktori
-                        koordinat lokasi penting, masjid, dan kediaman Ketua RT.</p>
+                    <p class="section-subtitle">Wilayah administrasi Dusun Jambon beserta direktori koordinat lokasi penting, masjid, dan kediaman Ketua RT.</p>
                 </div>
 
-                <!-- Admin Layout Container (Grid System) -->
                 <div class="admin-grid-layout">
-
-                    <!-- GRID ITEM 1: Full-width Peta Administrasi Banner Card -->
+                    <!-- Peta Administrasi Card -->
                     <div class="admin-map-card grid-full-width">
                         <div class="map-card-header">
                             <div class="map-header-info">
                                 <span class="badge-map"><i class="fa-solid fa-layer-group"></i> Peta Resmi Dusun</span>
-                                <h3>Peta Administrasi Wilayah Dusun Jambon</h3>
-                                <p>Visualisasi pemetaan wilayah administrasi, pembagian zona RT/RW, dan batas wilayah
-                                    Dusun Jambon.</p>
+                                <h3 id="petaTitleDisplay">Peta Administrasi Wilayah Dusun Jambon</h3>
+                                <p id="petaDescDisplay">Visualisasi pemetaan wilayah administrasi, pembagian zona RT/RW, dan batas wilayah Dusun Jambon.</p>
                             </div>
                             <div class="map-header-actions">
-                                <button class="btn-primary"
-                                    onclick="openImageModal('assets/PetaAdministrasiJambon.png', 'Peta Administrasi Wilayah Dusun Jambon')">
+                                <button class="btn-primary" id="btnZoomPeta">
                                     <i class="fa-solid fa-expand"></i> Perbesar Peta
                                 </button>
-                                <a href="assets/PetaAdministrasiJambon.png"
-                                    download="Peta_Administrasi_Dusun_Jambon.png" class="btn-secondary">
+                                <a href="" id="btnDownloadPeta" download class="btn-secondary">
                                     <i class="fa-solid fa-download"></i> Unduh Peta
                                 </a>
                             </div>
                         </div>
-                        <div class="map-image-wrapper"
-                            onclick="openImageModal('assets/PetaAdministrasiJambon.png', 'Peta Administrasi Wilayah Dusun Jambon')"
-                            title="Klik untuk memperbesar tampilan peta">
-                            <img src="assets/PetaAdministrasiJambon.png" alt="Peta Administrasi Dusun Jambon"
-                                class="map-main-img">
+                        <div class="map-image-wrapper" id="petaImgWrapper" title="Klik untuk memperbesar tampilan peta">
+                            <img src="" alt="Peta Administrasi Dusun Jambon" class="map-main-img" id="petaMainImg">
                             <div class="map-hover-overlay">
-                                <span><i class="fa-solid fa-magnifying-glass-plus"></i> Klik untuk Melihat Ukuran
-                                    Penuh</span>
+                                <span><i class="fa-solid fa-magnifying-glass-plus"></i> Klik untuk Melihat Ukuran Penuh</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section Header & Filter Pills for Locations Grid -->
+                    <!-- Locations Filter Header -->
                     <div class="location-section-header grid-full-width">
                         <div class="location-header-top">
                             <div>
-                                <h3><i class="fa-solid fa-location-dot"></i> Titik Lokasi Penting & Koordinat Google
-                                    Maps</h3>
-                                <p>Klik gambar untuk perbesar foto atau klik tombol koordinat untuk menavigasi via
-                                    Google Maps.</p>
+                                <h3><i class="fa-solid fa-location-dot"></i> Titik Lokasi Penting & Koordinat Google Maps</h3>
+                                <p>Klik gambar untuk perbesar foto atau klik tombol koordinat untuk menavigasi via Google Maps.</p>
                             </div>
                             <div class="category-pills">
-                                <button class="pill-btn location-pill active" data-category="all">Semua Lokasi
-                                    (6)</button>
-                                <button class="pill-btn location-pill" data-category="ibadah">Tempat Ibadah (1)</button>
-                                <button class="pill-btn location-pill" data-category="rt">Rumah Ketua RT (5)</button>
+                                <button class="pill-btn location-pill active" data-category="all">Semua Lokasi</button>
+                                <button class="pill-btn location-pill" data-category="ibadah">Tempat Ibadah</button>
+                                <button class="pill-btn location-pill" data-category="rt">Rumah Ketua RT</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- GRID ITEMS 2-7: Locations Grid (Masjid & RT 1 - RT 5) -->
-                    <div class="location-grid grid-full-width">
-
-                        <!-- Location 1: Masjid Al-Falah -->
-                        <div class="location-card" data-category="ibadah">
-                            <div class="location-img-box"
-                                onclick="openImageModal('assets/Masjid_Al-Falah.jpg', 'Masjid Al-Falah Dusun Jambon')"
-                                title="Klik untuk perbesar foto">
-                                <img src="assets/Masjid_Al-Falah.jpg" alt="Masjid Al-Falah" class="location-img">
-                                <span class="location-badge red"><i class="fa-solid fa-mosque"></i> Tempat Ibadah</span>
-                            </div>
-                            <div class="location-body">
-                                <h4 class="location-title">Masjid Al-Falah</h4>
-                                <p class="location-desc">Pusat peribadatan utama dan kegiatan keagamaan warga Dusun
-                                    Jambon.</p>
-                                <div class="coordinate-info">
-                                    <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                    <span class="coord-val">-7.662602, 110.26933</span>
-                                </div>
-                                <a href="https://www.google.com/maps?q=-7.662602,110.26933" target="_blank"
-                                    rel="noopener noreferrer" class="btn-gmaps">
-                                    <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Location 2: Rumah RT 1 -->
-                        <div class="location-card" data-category="rt">
-                            <div class="location-img-box"
-                                onclick="openImageModal('assets/Rumah_RT1.jpg', 'Kediaman Ketua RT 01 Dusun Jambon')"
-                                title="Klik untuk perbesar foto">
-                                <img src="assets/Rumah_RT1.jpg" alt="Rumah RT 1" class="location-img">
-                                <span class="location-badge blue"><i class="fa-solid fa-house-user"></i> Pengurus RT
-                                    01</span>
-                            </div>
-                            <div class="location-body">
-                                <h4 class="location-title">Rumah RT 01</h4>
-                                <p class="location-desc">Pusat koordinasi pelayanan warga untuk wilayah Rukun Tetangga
-                                    01.</p>
-                                <div class="coordinate-info">
-                                    <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                    <span class="coord-val">-7.661971, 110.268369</span>
-                                </div>
-                                <a href="https://www.google.com/maps?q=-7.661971,110.268369" target="_blank"
-                                    rel="noopener noreferrer" class="btn-gmaps">
-                                    <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Location 3: Rumah RT 2 -->
-                        <div class="location-card" data-category="rt">
-                            <div class="location-img-box"
-                                onclick="openImageModal('assets/Rumah_RT2.jpg', 'Kediaman Ketua RT 02 Dusun Jambon')"
-                                title="Klik untuk perbesar foto">
-                                <img src="assets/Rumah_RT2.jpg" alt="Rumah RT 2" class="location-img">
-                                <span class="location-badge blue"><i class="fa-solid fa-house-user"></i> Pengurus RT
-                                    02</span>
-                            </div>
-                            <div class="location-body">
-                                <h4 class="location-title">Rumah RT 02</h4>
-                                <p class="location-desc">Pusat koordinasi pelayanan warga untuk wilayah Rukun Tetangga
-                                    02.</p>
-                                <div class="coordinate-info">
-                                    <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                    <span class="coord-val">-7.661751, 110.269771</span>
-                                </div>
-                                <a href="https://www.google.com/maps?q=-7.661751,110.269771" target="_blank"
-                                    rel="noopener noreferrer" class="btn-gmaps">
-                                    <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Location 4: Rumah RT 3 -->
-                        <div class="location-card" data-category="rt">
-                            <div class="location-img-box"
-                                onclick="openImageModal('assets/Rumah_RT3.jpg', 'Kediaman Ketua RT 03 Dusun Jambon')"
-                                title="Klik untuk perbesar foto">
-                                <img src="assets/Rumah_RT3.jpg" alt="Rumah RT 3" class="location-img">
-                                <span class="location-badge blue"><i class="fa-solid fa-house-user"></i> Pengurus RT
-                                    03</span>
-                            </div>
-                            <div class="location-body">
-                                <h4 class="location-title">Rumah RT 03</h4>
-                                <p class="location-desc">Pusat koordinasi pelayanan warga untuk wilayah Rukun Tetangga
-                                    03.</p>
-                                <div class="coordinate-info">
-                                    <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                    <span class="coord-val">-7.662700, 110.269351</span>
-                                </div>
-                                <a href="https://www.google.com/maps?q=-7.662700,110.269351" target="_blank"
-                                    rel="noopener noreferrer" class="btn-gmaps">
-                                    <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Location 5: Rumah RT 4 -->
-                        <div class="location-card" data-category="rt">
-                            <div class="location-img-box"
-                                onclick="openImageModal('assets/Rumah_RT4.jpg', 'Kediaman Ketua RT 04 Dusun Jambon')"
-                                title="Klik untuk perbesar foto">
-                                <img src="assets/Rumah_RT4.jpg" alt="Rumah RT 4" class="location-img">
-                                <span class="location-badge blue"><i class="fa-solid fa-house-user"></i> Pengurus RT
-                                    04</span>
-                            </div>
-                            <div class="location-body">
-                                <h4 class="location-title">Rumah RT 04</h4>
-                                <p class="location-desc">Pusat koordinasi pelayanan warga untuk wilayah Rukun Tetangga
-                                    04.</p>
-                                <div class="coordinate-info">
-                                    <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                    <span class="coord-val">-7.663517, 110.269899</span>
-                                </div>
-                                <a href="https://www.google.com/maps?q=-7.663517,110.269899" target="_blank"
-                                    rel="noopener noreferrer" class="btn-gmaps">
-                                    <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Location 6: Rumah RT 5 -->
-                        <div class="location-card" data-category="rt">
-                            <div class="location-img-box"
-                                onclick="openImageModal('assets/Rumah_RT5.jpg', 'Kediaman Ketua RT 05 Dusun Jambon')"
-                                title="Klik untuk perbesar foto">
-                                <img src="assets/Rumah_RT5.jpg" alt="Rumah RT 5" class="location-img">
-                                <span class="location-badge blue"><i class="fa-solid fa-house-user"></i> Pengurus RT
-                                    05</span>
-                            </div>
-                            <div class="location-body">
-                                <h4 class="location-title">Rumah RT 05</h4>
-                                <p class="location-desc">Pusat koordinasi pelayanan warga untuk wilayah Rukun Tetangga
-                                    05.</p>
-                                <div class="coordinate-info">
-                                    <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                    <span class="coord-val">-7.663298, 110.269126</span>
-                                </div>
-                                <a href="https://www.google.com/maps?q=-7.663298,110.269126" target="_blank"
-                                    rel="noopener noreferrer" class="btn-gmaps">
-                                    <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
-
+                    <!-- Locations Grid -->
+                    <div class="location-grid grid-full-width" id="locationGrid">
+                        <!-- Dynamic via JS -->
                     </div>
                 </div>
             </div>
@@ -764,7 +399,7 @@
                     <p class="section-subtitle">Dukung karya dan produk kebanggaan warga lokal Dusun Jambon.</p>
                 </div>
 
-                <!-- UMKM Action & Filter Bar -->
+                <!-- UMKM Filter Bar -->
                 <div class="umkm-header-actions">
                     <div class="category-pills">
                         <button class="pill-btn umkm-pill active" data-category="all">Semua UMKM</button>
@@ -772,94 +407,11 @@
                         <button class="pill-btn umkm-pill" data-category="kerajinan">Kerajinan Tangan</button>
                         <button class="pill-btn umkm-pill" data-category="pertanian">Pertanian/Hasil Alam</button>
                     </div>
-                    <button class="btn-primary" onclick="openAddUmkmModal()">
-                        <i class="fa-solid fa-plus-circle"></i> Daftarkan UMKM Anda
-                    </button>
                 </div>
 
-                <!-- UMKM Grid Cards -->
-                <div class="umkm-grid">
-
-                    <!-- UMKM 1 -->
-                    <div class="umkm-card" data-category="kuliner">
-                        <div class="umkm-img-box">
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">Kuliner</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-cookie-bite"></i></div>
-                                <h4 class="placeholder-title">[Gambar] Rumah Produksi Rara Kue</h4>
-                                <p class="placeholder-subtitle">Katalog Rara Kue</p>
-                            </div>
-                        </div>
-                        <div class="umkm-body">
-                            <span class="umkm-category-tag">Kuliner</span>
-                            <h3 class="umkm-title">Rara Kue</h3>
-                            <div class="umkm-owner"><i class="fa-regular fa-user"></i> Pemilik: Ibu Maryam</div>
-                            <p class="umkm-desc">Keripik tempe renyah bumbu rempah tradisional khas Dusun Jambon tanpa
-                                bahan pengawet.</p>
-                            <div class="umkm-footer">
-                                <div class="umkm-price">Rp 15.000 / bks</div>
-                                <a href="https://wa.me/6281234567890?text=Halo%20Ibu%20Maryam,%20saya%20ingin%20pesan%20Keripik%20Tempe"
-                                    target="_blank" class="btn-wa-order">
-                                    <i class="fa-brands fa-whatsapp"></i> Pesan WA
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- UMKM 2 -->
-                    <div class="umkm-card" data-category="kerajinan">
-                        <div class="umkm-img-box">
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">Kerajinan</span>
-                                <div class="placeholder-icon"><i
-                                        class="fa-solid fa-[#d92626] fa-wand-magic-sparkles"></i></div>
-                                <h4 class="placeholder-title">[Gambar] Kerajinan Anyaman Bambu</h4>
-                                <p class="placeholder-subtitle">Foto Produk Kriya Bambu</p>
-                            </div>
-                        </div>
-                        <div class="umkm-body">
-                            <span class="umkm-category-tag">Kerajinan</span>
-                            <h3 class="umkm-title">Anyaman Bambu & Tampah Hias</h3>
-                            <div class="umkm-owner"><i class="fa-regular fa-user"></i> Pemilik: Bpk. Suwandi</div>
-                            <p class="umkm-desc">Kerajinan perabotan dan hiasan dinding dari olahan bambu pilihan
-                                berkualitas tinggi.</p>
-                            <div class="umkm-footer">
-                                <div class="umkm-price">Rp 35.000 - Rp 150.000</div>
-                                <a href="https://wa.me/6281234567891?text=Halo%20Bpk.%20Suwandi,%20saya%20tertarik%20produk%20Anyaman%20Bambu"
-                                    target="_blank" class="btn-wa-order">
-                                    <i class="fa-brands fa-whatsapp"></i> Pesan WA
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- UMKM 3 -->
-                    <div class="umkm-card" data-category="pertanian">
-                        <div class="umkm-img-box">
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">Hasil Alam</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-jar"></i></div>
-                                <h4 class="placeholder-title">[Gambar] Madu Hutan Murni Jambon</h4>
-                                <p class="placeholder-subtitle">Foto Botol Madu Alami</p>
-                            </div>
-                        </div>
-                        <div class="umkm-body">
-                            <span class="umkm-category-tag">Pertanian / Hasil Alam</span>
-                            <h3 class="umkm-title">Madu Hutan Murni Asli Dusun</h3>
-                            <div class="umkm-owner"><i class="fa-regular fa-user"></i> Pemilik: Kelompok Tani Hutan
-                            </div>
-                            <p class="umkm-desc">Madu murni alami hasil panen sarang lebah pohon liar Dusun Jambon, kaya
-                                nutrisi dan khasiat.</p>
-                            <div class="umkm-footer">
-                                <div class="umkm-price">Rp 85.000 / botol</div>
-                                <a href="https://wa.me/6281234567892?text=Halo,%20saya%20ingin%20membeli%20Madu%20Hutan%20Murni"
-                                    target="_blank" class="btn-wa-order">
-                                    <i class="fa-brands fa-whatsapp"></i> Pesan WA
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- UMKM Grid Container -->
+                <div class="umkm-grid" id="umkmGrid">
+                    <!-- Dynamic via JS -->
                 </div>
             </div>
         </section>
@@ -884,7 +436,7 @@
                                 <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
                                 <div class="info-details">
                                     <h5>Alamat Lengkap</h5>
-                                    <p>Jl. Raya Utama Dusun Jambon No. 01, RT 02 / RW 01, Kecamatan Jambon</p>
+                                    <p id="kontakAddressDisplay">Loading...</p>
                                 </div>
                             </div>
                             <div class="info-item">
@@ -898,24 +450,21 @@
                                 <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
                                 <div class="info-details">
                                     <h5>Telepon / WhatsApp Resmi</h5>
-                                    <p>+62 812-3456-7890 (Layanan Warga)</p>
+                                    <p id="kontakPhoneDisplay">Loading...</p>
                                 </div>
                             </div>
                             <div class="info-item">
                                 <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
                                 <div class="info-details">
                                     <h5>Email Layanan</h5>
-                                    <p>admin@dusunjambonkita.desa.id</p>
+                                    <p id="kontakEmailDisplay">Loading...</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Map Placeholder Box -->
-                        <div class="placeholder-image-box map-placeholder-box">
-                            <span class="placeholder-tag">Peta Lokasi</span>
-                            <div class="placeholder-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-                            <h4 class="placeholder-title">[Gambar/Peta] Peta Navigasi Wilayah Dusun Jambon</h4>
-                            <p class="placeholder-subtitle">Tampilan Peta Digital Navigasi Dusun</p>
+                        <!-- Map Embed Container -->
+                        <div style="margin-top: 24px; border-radius:14px; overflow:hidden;">
+                            <iframe id="kontakGmapsIframe" src="" width="100%" height="260" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                         </div>
                     </div>
 
@@ -942,8 +491,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Isi Pesan / Aspirasi</label>
-                                <textarea class="form-textarea" placeholder="Tuliskan pesan Anda secara jelas..."
-                                    required></textarea>
+                                <textarea class="form-textarea" placeholder="Tuliskan pesan Anda secara jelas..." required></textarea>
                             </div>
                             <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
                                 <i class="fa-solid fa-paper-plane"></i> Kirim Pesan
@@ -985,13 +533,12 @@
                             <i class="fa-solid fa-building-columns"></i>
                         </div>
                         <div class="brand-text">
-                            <span class="brand-title">Dusun Jambon</span>
+                            <span class="brand-title" id="footerBrandTitleDisplay">Dusun Jambon</span>
                             <span class="brand-subtitle">Portal Resmi Dusun</span>
                         </div>
                     </div>
                     <p>
-                        Wadah informasi resmi, transparansi pelayanan administrasi, dan pemberdayaan potensi ekonomi
-                        warga Dusun Jambon.
+                        Wadah informasi resmi, transparansi pelayanan administrasi, dan pemberdayaan potensi ekonomi warga Dusun Jambon.
                     </p>
                 </div>
 
@@ -1019,14 +566,9 @@
                 <div class="footer-col">
                     <h5>Kontak Dusun</h5>
                     <ul class="footer-links">
-                        <li><a href="#kontak" class="footer-nav-link" data-target="kontak"><i
-                                    class="fa-solid fa-location-dot"></i> Dusun Jambon, Karangtalun</a></li>
-                        <li><a href="#kontak" class="footer-nav-link" data-target="kontak"><i
-                                    class="fa-solid fa-phone"></i>
-                                +62 812-3456-7890</a></li>
-                        <li><a href="#kontak" class="footer-nav-link" data-target="kontak"><i
-                                    class="fa-solid fa-envelope"></i>
-                                admin@dusunjambon.id</a></li>
+                        <li><a href="#kontak" class="footer-nav-link" data-target="kontak"><i class="fa-solid fa-location-dot"></i> <span id="footerAddressDisplay">Dusun Jambon</span></a></li>
+                        <li><a href="#kontak" class="footer-nav-link" data-target="kontak"><i class="fa-solid fa-phone"></i> <span id="footerPhoneDisplay">+62 812-3456-7890</span></a></li>
+                        <li><a href="#kontak" class="footer-nav-link" data-target="kontak"><i class="fa-solid fa-envelope"></i> <span id="footerEmailDisplay">admin@dusunjambon.id</span></a></li>
                     </ul>
                 </div>
             </div>
