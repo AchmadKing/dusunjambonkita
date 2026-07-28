@@ -1,5 +1,6 @@
 /**
- * Dusun Jambon Official Portal - JavaScript Interactive Logic
+ * Dusun Jambon Official Portal - Main Public Script
+ * Integrated Dynamic Data Fetching via Supabase JS SDK Service
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,21 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
     const sidebarDrawer = document.getElementById('sidebarDrawer');
 
-    // Function to switch active section/page
     function switchSection(targetId) {
         if (!targetId) return;
 
-        // Normalize target ID (remove hash if present)
         const cleanId = targetId.replace('#', '');
         const targetSection = document.getElementById(cleanId);
 
         if (targetSection) {
-            // Hide all sections
             sections.forEach(sec => sec.classList.remove('active'));
-            // Show target section
             targetSection.classList.add('active');
 
-            // Update active state in desktop & mobile nav
             document.querySelectorAll('.desktop-nav-menu .nav-link, .mobile-nav-link').forEach(link => {
                 const linkTarget = link.getAttribute('data-target') || link.getAttribute('href');
                 if (linkTarget && linkTarget.replace('#', '') === cleanId) {
@@ -38,18 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Scroll to top of window smoothly
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
 
-            // Close mobile sidebar if open
             closeSidebar();
         }
     }
 
-    // Attach click listeners to all navigation triggers
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -62,156 +55,59 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Mobile Sidebar Drawer Logic
     // ----------------------------------------------------------------------
     function openSidebar() {
-        sidebarBackdrop.classList.add('active');
-        sidebarDrawer.classList.add('active');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+        if (sidebarDrawer) sidebarDrawer.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
     function closeSidebar() {
-        sidebarBackdrop.classList.remove('active');
-        sidebarDrawer.classList.remove('active');
+        if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+        if (sidebarDrawer) sidebarDrawer.classList.remove('active');
         document.body.style.overflow = 'auto';
     }
 
-    if (mobileHamburger) {
-        mobileHamburger.addEventListener('click', openSidebar);
-    }
-    if (btnCloseSidebar) {
-        btnCloseSidebar.addEventListener('click', closeSidebar);
-    }
-    if (sidebarBackdrop) {
-        sidebarBackdrop.addEventListener('click', closeSidebar);
-    }
+    if (mobileHamburger) mobileHamburger.addEventListener('click', openSidebar);
+    if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeSidebar);
+    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
 
     // Sticky Header Shadow on Scroll
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 30) {
-            navbarHeader.classList.add('scrolled');
-        } else {
-            navbarHeader.classList.remove('scrolled');
+        if (navbarHeader) {
+            if (window.scrollY > 30) {
+                navbarHeader.classList.add('scrolled');
+            } else {
+                navbarHeader.classList.remove('scrolled');
+            }
         }
     });
 
     // ----------------------------------------------------------------------
-    // 3. News Search & Category Filtering
-    // ----------------------------------------------------------------------
-    const newsSearchInput = document.getElementById('newsSearchInput');
-    const newsPills = document.querySelectorAll('.news-pill');
-    const newsCards = document.querySelectorAll('.news-card');
-
-    let currentNewsCategory = 'all';
-    let currentNewsQuery = '';
-
-    function filterNews() {
-        newsCards.forEach(card => {
-            const title = card.getAttribute('data-title').toLowerCase();
-            const category = card.getAttribute('data-category');
-            
-            const matchCategory = currentNewsCategory === 'all' || category === currentNewsCategory;
-            const matchQuery = title.includes(currentNewsQuery);
-
-            if (matchCategory && matchQuery) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    }
-
-    newsPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            newsPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            currentNewsCategory = pill.getAttribute('data-category');
-            filterNews();
-        });
-    });
-
-    if (newsSearchInput) {
-        newsSearchInput.addEventListener('input', (e) => {
-            currentNewsQuery = e.target.value.toLowerCase().trim();
-            filterNews();
-        });
-    }
-
-    // ----------------------------------------------------------------------
-    // 4. UMKM Category Filtering
-    // ----------------------------------------------------------------------
-    const umkmPills = document.querySelectorAll('.umkm-pill');
-    const umkmCards = document.querySelectorAll('.umkm-card');
-
-    umkmPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            umkmPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            const category = pill.getAttribute('data-category');
-
-            umkmCards.forEach(card => {
-                const cardCategory = card.getAttribute('data-category');
-                if (category === 'all' || cardCategory === category) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    });
-
-    // ----------------------------------------------------------------------
-    // 5. Location Category Filtering
-    // ----------------------------------------------------------------------
-    const locationPills = document.querySelectorAll('.location-pill');
-    const locationCards = document.querySelectorAll('.location-card');
-
-    locationPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            locationPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            const category = pill.getAttribute('data-category');
-
-            locationCards.forEach(card => {
-                const cardCategory = card.getAttribute('data-category');
-                if (category === 'all' || cardCategory === category) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    });
-
-    // ----------------------------------------------------------------------
-    // 6. Modal Management System
+    // 3. Modal Management System
     // ----------------------------------------------------------------------
     const modalBackdrop = document.getElementById('modalBackdrop');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
     const btnCloseModal = document.getElementById('btnCloseModal');
 
-    function openModal(title, contentHTML) {
-        modalTitle.textContent = title;
-        modalBody.innerHTML = contentHTML;
-        modalBackdrop.classList.add('active');
+    window.openModal = function(title, contentHTML) {
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalBody) modalBody.innerHTML = contentHTML;
+        if (modalBackdrop) modalBackdrop.classList.add('active');
         document.body.style.overflow = 'hidden';
-    }
+    };
 
-    function closeModal() {
-        modalBackdrop.classList.remove('active');
+    window.closeModal = function() {
+        if (modalBackdrop) modalBackdrop.classList.remove('active');
         document.body.style.overflow = 'auto';
-    }
+    };
 
-    if (btnCloseModal) {
-        btnCloseModal.addEventListener('click', closeModal);
-    }
+    if (btnCloseModal) btnCloseModal.addEventListener('click', window.closeModal);
     if (modalBackdrop) {
         modalBackdrop.addEventListener('click', (e) => {
-            if (e.target === modalBackdrop) closeModal();
+            if (e.target === modalBackdrop) window.closeModal();
         });
     }
 
-
-
-    // Trigger Image Modal (Lightbox View)
     window.openImageModal = function(imgSrc, caption) {
         const html = `
             <div style="text-align: center; padding: 10px 0;">
@@ -231,360 +127,486 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
-        openModal(caption || "Tampilan Foto", html);
+        window.openModal(caption || "Tampilan Foto", html);
     };
 
-    // Trigger News Detail Modal
-    window.readNewsModal = function(title, date, category, text) {
+    window.readNewsModal = function(title, date, category, text, imgSrc) {
+        const imageHTML = imgSrc ? `
+            <div style="background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
+                <img src="${imgSrc}" alt="${title}" style="width: 100%; max-height: 280px; object-fit: cover;">
+            </div>
+        ` : `
+            <div class="placeholder-image-box" style="height: 220px; margin-bottom: 20px;">
+                <div class="placeholder-icon"><i class="fa-regular fa-newspaper"></i></div>
+                <div class="placeholder-title">${title}</div>
+                <div class="placeholder-subtitle">Dokumentasi Berita Dusun Jambon</div>
+            </div>
+        `;
+
         const html = `
             <div style="margin-bottom: 20px;">
-                <div style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
+                <div style="font-size: 0.85rem; color: var(--accent-red); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
                     ${category} &bull; ${date}
                 </div>
-                <div class="placeholder-image-box" style="height: 220px; margin-bottom: 20px;">
-                    <div class="placeholder-icon"><i class="fa-regular fa-newspaper"></i></div>
-                    <div class="placeholder-title">[Gambar] ${title}</div>
-                    <div class="placeholder-subtitle">Dokumentasi Berita Dusun Jambon</div>
-                </div>
-                <p style="color: var(--text-muted); line-height: 1.8; font-size: 1rem; margin-bottom: 16px;">
+                ${imageHTML}
+                <div style="color: var(--text-main); line-height: 1.8; font-size: 1rem; margin-bottom: 16px;">
                     ${text}
-                </p>
-                <p style="color: var(--text-muted); line-height: 1.8; font-size: 1rem;">
-                    Kegiatan ini dihadiri oleh jajaran perangkat Dusun Jambon beserta seluruh warga masyarakat setempat dengan antusiasme yang tinggi. Diharapkan program ini memberikan manfaat nyata secara berkelanjutan.
-                </p>
+                </div>
             </div>
-            <button onclick="closeModal()" class="btn-secondary" style="width: 100%; justify-content: center;">
-                Tutup Berita
-            </button>
-        `;
-        openModal(title, html);
-    };
-
-    // Trigger Add UMKM Modal
-    window.openAddUmkmModal = function() {
-        const html = `
-            <form id="addUmkmForm" onsubmit="handleFormSubmit(event, 'Pendaftaran UMKM Anda telah diterima untuk ditinjau!')">
-                <div class="form-group">
-                    <label class="form-label">Nama Usaha / UMKM</label>
-                    <input type="text" class="form-input" placeholder="Contoh: Keripik Tempe Jambon Renyah" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Kategori Usaha</label>
-                    <select class="form-select" required>
-                        <option value="Kuliner">Kuliner / Makanan & Minuman</option>
-                        <option value="Kerajinan">Kerajinan Tangan / Kriya</option>
-                        <option value="Pertanian">Pertanian & Peternakan</option>
-                        <option value="Jasa">Jasa & Produk Lainnya</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nama Pemilik Usaha</label>
-                    <input type="text" class="form-input" placeholder="Nama pemilik" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nomor WhatsApp Pemesanan</label>
-                    <input type="tel" class="form-input" placeholder="08xxxxxxxxxx" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Kisaran Harga Produk</label>
-                    <input type="text" class="form-input" placeholder="Contoh: Rp 10.000 - Rp 50.000" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Deskripsi Singkat Usaha</label>
-                    <textarea class="form-textarea" placeholder="Jelaskan keunggulan dan spesifikasi produk Anda..." required></textarea>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">
-                    <i class="fa-solid fa-plus-circle"></i> Daftarkan UMKM
+            <div style="text-align: right;">
+                <button onclick="closeModal()" class="btn-secondary" style="padding: 8px 20px;">
+                    Tutup Berita
                 </button>
-            </form>
+            </div>
         `;
-        openModal("Form Daftarkan UMKM Dusun Jambon", html);
+        window.openModal(title, html);
     };
 
-    // Form Submit Helper with Toast Feedback
-    window.handleFormSubmit = function(e, successMsg) {
-        e.preventDefault();
-        closeModal();
-        showToast(successMsg);
-    };
-
-    // Contact Form Handler
-    const mainContactForm = document.getElementById('mainContactForm');
-    if (mainContactForm) {
-        mainContactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            mainContactForm.reset();
-            showToast('Pesan Anda berhasil dikirim ke Pengurus Dusun Jambon!');
-        });
-    }
-
     // ----------------------------------------------------------------------
-    // 7. Profile Sejarah & Arsip Slideshow Logic
+    // 4. Dynamic Data Fetching from Supabase JS SDK Service
     // ----------------------------------------------------------------------
-    const slideshowContainer = document.getElementById('profileSejarahSlideshow');
-    if (slideshowContainer) {
-        const slideItems = slideshowContainer.querySelectorAll('.slide-item');
-        const dots = slideshowContainer.querySelectorAll('.slide-dots .dot');
-        const prevBtn = document.getElementById('slidePrevBtn');
-        const nextBtn = document.getElementById('slideNextBtn');
-        let currentSlideIndex = 0;
-        let slideTimer = null;
 
-        function showSlide(index) {
-            if (index < 0) index = slideItems.length - 1;
-            if (index >= slideItems.length) index = 0;
-            currentSlideIndex = index;
-
-            slideItems.forEach((slide, i) => {
-                if (i === currentSlideIndex) {
-                    slide.classList.add('active');
-                } else {
-                    slide.classList.remove('active');
-                }
-            });
-
-            dots.forEach((dot, i) => {
-                if (i === currentSlideIndex) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
-            });
-        }
-
-        function nextSlide() {
-            showSlide(currentSlideIndex + 1);
-        }
-
-        function prevSlide() {
-            showSlide(currentSlideIndex - 1);
-        }
-
-        function startAutoSlide() {
-            stopAutoSlide();
-            slideTimer = setInterval(nextSlide, 4000);
-        }
-
-        function stopAutoSlide() {
-            if (slideTimer) clearInterval(slideTimer);
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                nextSlide();
-                startAutoSlide();
-            });
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                prevSlide();
-                startAutoSlide();
-            });
-        }
-
-        dots.forEach(dot => {
-            dot.addEventListener('click', (e) => {
-                const targetIdx = parseInt(e.target.getAttribute('data-index'), 10);
-                if (!isNaN(targetIdx)) {
-                    showSlide(targetIdx);
-                    startAutoSlide();
-                }
-            });
-        });
-
-        slideshowContainer.addEventListener('mouseenter', stopAutoSlide);
-        slideshowContainer.addEventListener('mouseleave', startAutoSlide);
-
-        // Start slideshow initially
-        startAutoSlide();
-    }
-
-    // ----------------------------------------------------------------------
-    // 8. Toast Notification Generator
-    // ----------------------------------------------------------------------
-    function showToast(message) {
-        let container = document.getElementById('toastContainer');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
-
-        const toast = document.createElement('div');
-        toast.className = 'toast-item';
-        toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(50px)';
-            toast.style.transition = '0.35s ease';
-            setTimeout(() => toast.remove(), 350);
-        }, 4000);
-    }
-
-    // ----------------------------------------------------------------------
-    // 9. Dynamic Data Syncing with Supabase Data Service
-    // ----------------------------------------------------------------------
-    async function loadDynamicContent() {
-        if (!window.dusunService) return;
-
+    // Load Beranda Data
+    async function loadBerandaData() {
         try {
-            // A. Render Beranda Content
-            const beranda = await window.dusunService.getBeranda();
-            if (beranda) {
+            const b = await window.dusunService.getBeranda();
+            if (b) {
                 const heroHeadline = document.querySelector('.hero-headline');
-                if (heroHeadline) {
-                    heroHeadline.innerHTML = `${beranda.hero_headline} <span>${beranda.hero_headline_span}</span> <span class="highlight-red">${beranda.hero_headline_red}</span>`;
+                if (heroHeadline && b.hero_headline) {
+                    heroHeadline.innerHTML = `${b.hero_headline} <span>${b.hero_headline_span || ''}</span> <span class="highlight-red">${b.hero_headline_red || ''}</span>`;
                 }
+
                 const heroDesc = document.querySelector('.hero-desc');
-                if (heroDesc) heroDesc.textContent = beranda.hero_desc;
+                if (heroDesc && b.hero_desc) heroDesc.textContent = b.hero_desc;
 
                 const heroImg = document.querySelector('.hero-main-img');
-                if (heroImg && beranda.hero_image_url) heroImg.src = beranda.hero_image_url;
+                if (heroImg && b.hero_image_url) heroImg.src = b.hero_image_url;
 
                 const heroCap = document.querySelector('.hero-image-caption span');
-                if (heroCap && beranda.hero_image_caption) heroCap.textContent = beranda.hero_image_caption;
+                if (heroCap && b.hero_image_caption) heroCap.textContent = b.hero_image_caption;
 
-                const speechCard = document.querySelector('#beranda .history-card');
-                if (speechCard) {
-                    const h3 = speechCard.querySelector('h3');
-                    if (h3 && beranda.kepala_dusun_title) h3.textContent = beranda.kepala_dusun_title;
-                    const pList = speechCard.querySelectorAll('p');
-                    if (pList.length >= 2) {
-                        pList[0].textContent = beranda.kepala_dusun_speech_1;
-                        pList[1].textContent = beranda.kepala_dusun_speech_2;
-                    }
-                    const nameDiv = speechCard.querySelector('div[style*="accent-red"]');
-                    if (nameDiv && beranda.kepala_dusun_name) nameDiv.textContent = `- ${beranda.kepala_dusun_name}`;
-                }
+                const kdTitle = document.getElementById('kdTitleDisplay');
+                if (kdTitle && b.kepala_dusun_title) kdTitle.textContent = b.kepala_dusun_title;
+
+                const kdSpeech1 = document.getElementById('kdSpeechDisplay1');
+                if (kdSpeech1 && b.kepala_dusun_speech_1) kdSpeech1.textContent = b.kepala_dusun_speech_1;
+
+                const kdSpeech2 = document.getElementById('kdSpeechDisplay2');
+                if (kdSpeech2 && b.kepala_dusun_speech_2) kdSpeech2.textContent = b.kepala_dusun_speech_2;
+
+                const kdName = document.getElementById('kdNameDisplay');
+                if (kdName && b.kepala_dusun_name) kdName.textContent = b.kepala_dusun_name;
+
+                const kdSig = document.getElementById('kdSignatureDisplay');
+                if (kdSig && b.kepala_dusun_name) kdSig.textContent = `- ${b.kepala_dusun_name}`;
             }
-
-            // B. Render Profil & Visi Misi
-            const profil = await window.dusunService.getProfil();
-            if (profil) {
-                const sejarahCard = document.querySelector('#profil .history-card');
-                if (sejarahCard) {
-                    const pList = sejarahCard.querySelectorAll('p');
-                    if (pList.length >= 2) {
-                        pList[0].textContent = profil.sejarah_p1;
-                        pList[1].textContent = profil.sejarah_p2;
-                    }
-                }
-                const visiBody = document.querySelector('.vm-card:not(.mission) .vm-body p');
-                if (visiBody && profil.visi_text) visiBody.textContent = `"${profil.visi_text}"`;
-
-                const misiUl = document.querySelector('.vm-card.mission .vm-body ul');
-                if (misiUl && Array.isArray(profil.misi_list)) {
-                    misiUl.innerHTML = profil.misi_list.map(m => `<li><i class="fa-solid fa-check"></i> ${m}</li>`).join('');
-                }
-            }
-
-            // C. Render Berita
-            const beritaList = await window.dusunService.getBerita();
-            const newsGrid = document.getElementById('newsGrid');
-            if (newsGrid && Array.isArray(beritaList) && beritaList.length > 0) {
-                newsGrid.innerHTML = beritaList.map(b => `
-                    <article class="news-card" data-category="${b.category}" data-title="${b.title}">
-                        <div class="news-img-box">
-                            ${b.image_url ? `<img src="${b.image_url}" alt="${b.title}" style="width: 100%; height: 100%; object-fit: cover;">` : `
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">${b.category}</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-newspaper"></i></div>
-                                <h4 class="placeholder-title">${b.title}</h4>
-                            </div>`}
-                        </div>
-                        <div class="news-content">
-                            <div class="news-meta">
-                                <span><i class="fa-regular fa-calendar"></i> ${b.date_str}</span>
-                                <span><i class="fa-regular fa-user"></i> ${b.author || 'Pengurus Dusun'}</span>
-                            </div>
-                            <h3 class="news-title">${b.title}</h3>
-                            <p class="news-excerpt">${b.excerpt}</p>
-                            <div class="news-footer">
-                                <button class="btn-read-more" onclick="readNewsModal('${b.title.replace(/'/g, "\\'")}', '${b.date_str}', '${b.category}', '${b.content.replace(/'/g, "\\'")}')">
-                                    Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                `).join('');
-            }
-
-            // D. Render Administrasi Peta & Titik Lokasi
-            const peta = await window.dusunService.getAdministrasiPeta();
-            if (peta) {
-                const mapTitle = document.querySelector('.map-header-info h3');
-                if (mapTitle && peta.map_title) mapTitle.textContent = peta.map_title;
-                const mapDesc = document.querySelector('.map-header-info p');
-                if (mapDesc && peta.map_desc) mapDesc.textContent = peta.map_desc;
-                const mapImg = document.querySelector('.map-main-img');
-                if (mapImg && peta.map_image_url) mapImg.src = peta.map_image_url;
-            }
-
-            const lokasiList = await window.dusunService.getTitikLokasi();
-            const lokasiGrid = document.querySelector('.location-grid');
-            if (lokasiGrid && Array.isArray(lokasiList) && lokasiList.length > 0) {
-                lokasiGrid.innerHTML = lokasiList.map(l => `
-                    <div class="location-card" data-category="${l.category}">
-                        <div class="location-img-box" onclick="openImageModal('${l.image_url}', '${l.title.replace(/'/g, "\\'")}')">
-                            <img src="${l.image_url}" alt="${l.title}" class="location-img" onerror="this.src='assets/Masjid_Al-Falah.jpg'">
-                            <span class="location-badge ${l.badge_color || 'blue'}"><i class="fa-solid fa-location-dot"></i> ${l.badge_label || l.category}</span>
-                        </div>
-                        <div class="location-body">
-                            <h4 class="location-title">${l.title}</h4>
-                            <p class="location-desc">${l.description}</p>
-                            <div class="coordinate-info">
-                                <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
-                                <span class="coord-val">${l.coordinates}</span>
-                            </div>
-                            <a href="${l.gmaps_url}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
-                                <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
-                            </a>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // E. Render UMKM
-            const umkmList = await window.dusunService.getUMKM();
-            const umkmGrid = document.querySelector('.umkm-grid');
-            if (umkmGrid && Array.isArray(umkmList) && umkmList.length > 0) {
-                umkmGrid.innerHTML = umkmList.map(u => `
-                    <div class="umkm-card" data-category="${u.category}">
-                        <div class="umkm-img-box">
-                            ${u.image_url ? `<img src="${u.image_url}" alt="${u.title}" style="width: 100%; height: 100%; object-fit: cover;">` : `
-                            <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
-                                <span class="placeholder-tag">${u.category}</span>
-                                <div class="placeholder-icon"><i class="fa-solid fa-shop"></i></div>
-                                <h4 class="placeholder-title">${u.title}</h4>
-                            </div>`}
-                        </div>
-                        <div class="umkm-body">
-                            <span class="umkm-category-tag">${u.category}</span>
-                            <h3 class="umkm-title">${u.title}</h3>
-                            <div class="umkm-owner"><i class="fa-regular fa-user"></i> Pemilik: ${u.owner}</div>
-                            <p class="umkm-desc">${u.description}</p>
-                            <div class="umkm-footer">
-                                <div class="umkm-price">${u.price_str}</div>
-                                <a href="https://wa.me/${u.whatsapp.replace(/\+/g, '')}?text=Halo%20${encodeURIComponent(u.owner)},%20saya%20tertarik%20dengan%20${encodeURIComponent(u.title)}" target="_blank" class="btn-wa-order">
-                                    <i class="fa-brands fa-whatsapp"></i> Pesan WA
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-
-
         } catch (err) {
-            console.error('[loadDynamicContent] Error:', err);
+            console.error('Error loading beranda via Supabase SDK:', err);
         }
     }
 
-    // Jalankan sync data dinamis saat halaman siap
-    loadDynamicContent();
+    // Load Profil Data
+    async function loadProfilData() {
+        try {
+            const p = await window.dusunService.getProfil();
+            if (p) {
+                const s1 = document.getElementById('profilSejarahDisplay1');
+                if (s1 && p.sejarah_p1) s1.textContent = p.sejarah_p1;
+
+                const s2 = document.getElementById('profilSejarahDisplay2');
+                if (s2 && p.sejarah_p2) s2.textContent = p.sejarah_p2;
+
+                const v = document.getElementById('profilVisiDisplay');
+                if (v && p.visi_text) v.textContent = `"${p.visi_text}"`;
+
+                const m = document.getElementById('profilMisiDisplay');
+                if (m && p.misi_list) {
+                    let list = p.misi_list;
+                    if (typeof list === 'string') {
+                        try { list = JSON.parse(list); } catch(e) { list = []; }
+                    }
+                    if (Array.isArray(list)) {
+                        m.innerHTML = list.map(item => `<li><i class="fa-solid fa-check"></i> ${item}</li>`).join('');
+                    }
+                }
+            }
+
+            const gallery = await window.dusunService.getProfilGallery();
+            if (Array.isArray(gallery)) {
+                renderGalleryAndSlideshow(gallery);
+            }
+        } catch (err) {
+            console.error('Error loading profil via Supabase SDK:', err);
+        }
+    }
+
+    let slideIndex = 0;
+    function renderGalleryAndSlideshow(galleryItems) {
+        const track = document.getElementById('profilSlideshowTrack');
+        const dotsContainer = document.getElementById('slideDots');
+        const galleryGrid = document.getElementById('profilGalleryGrid');
+
+        const slideItems = galleryItems.filter(i => i.type === 'slideshow' || !i.type);
+        const gridItems = galleryItems.filter(i => i.type === 'gallery' || !i.type);
+
+        if (track && slideItems.length > 0) {
+            track.innerHTML = slideItems.map((item, idx) => `
+                <div class="slide-item ${idx === 0 ? 'active' : ''}">
+                    <img src="${item.image_url}" alt="${item.title}" onclick="openImageModal('${item.image_url}', '${item.title}')">
+                    <div class="slide-caption">
+                        <span class="slide-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${item.tag || 'Sejarah & Arsip'}</span>
+                        <h4>${item.title}</h4>
+                    </div>
+                </div>
+            `).join('');
+
+            if (dotsContainer) {
+                dotsContainer.innerHTML = slideItems.map((_, idx) => `
+                    <span class="dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></span>
+                `).join('');
+            }
+
+            initSlideshowControls(slideItems.length);
+        }
+
+        if (galleryGrid && gridItems.length > 0) {
+            galleryGrid.innerHTML = gridItems.map(item => `
+                <div class="gallery-card" onclick="openImageModal('${item.image_url}', '${item.title}')">
+                    <div class="gallery-img-box">
+                        <img src="${item.image_url}" alt="${item.title}">
+                        <div class="gallery-overlay">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <span class="gallery-tag">${item.tag || 'Kegiatan'}</span>
+                        <h4 class="gallery-title">${item.title}</h4>
+                        <p class="gallery-subtitle">${item.subtitle || ''}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function initSlideshowControls(totalSlides) {
+        const slides = document.querySelectorAll('.slide-item');
+        const dots = document.querySelectorAll('.dot');
+        const prevBtn = document.getElementById('slidePrevBtn');
+        const nextBtn = document.getElementById('slideNextBtn');
+
+        function showSlide(n) {
+            slideIndex = (n + totalSlides) % totalSlides;
+            slides.forEach((s, idx) => s.classList.toggle('active', idx === slideIndex));
+            dots.forEach((d, idx) => d.classList.toggle('active', idx === slideIndex));
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => showSlide(slideIndex - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => showSlide(slideIndex + 1));
+
+        dots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => showSlide(idx));
+        });
+
+        setInterval(() => showSlide(slideIndex + 1), 4500);
+    }
+
+    // Load Berita Data
+    let allNewsData = [];
+    async function loadBeritaData() {
+        try {
+            const data = await window.dusunService.getBerita();
+            if (Array.isArray(data)) {
+                allNewsData = data;
+                renderNewsGrid(allNewsData);
+            }
+        } catch (err) {
+            console.error('Error loading news via Supabase SDK:', err);
+        }
+    }
+
+    function renderNewsGrid(newsItems) {
+        const container = document.getElementById('newsGrid');
+        if (!container) return;
+
+        if (newsItems.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada berita ditemukan.</div>`;
+            return;
+        }
+
+        container.innerHTML = newsItems.map(item => `
+            <article class="news-card" data-category="${item.category}" data-title="${item.title.toLowerCase()}">
+                <div class="news-img-box">
+                    ${item.image_url ? `
+                        <img src="${item.image_url}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">
+                    ` : `
+                        <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
+                            <span class="placeholder-tag">${item.category}</span>
+                            <div class="placeholder-icon"><i class="fa-regular fa-newspaper"></i></div>
+                            <h4 class="placeholder-title">${item.title}</h4>
+                        </div>
+                    `}
+                </div>
+                <div class="news-content">
+                    <div class="news-meta">
+                        <span><i class="fa-regular fa-calendar"></i> ${item.date_str}</span>
+                        <span><i class="fa-regular fa-user"></i> ${item.author}</span>
+                    </div>
+                    <h3 class="news-title">${item.title}</h3>
+                    <p class="news-excerpt">${item.excerpt}</p>
+                    <div class="news-footer">
+                        <button class="btn-read-more" onclick="readNewsModal('${item.title.replace(/'/g, "\\'")}', '${item.date_str}', '${item.category}', '${item.content.replace(/'/g, "\\'").replace(/\n/g, "<br>")}', '${item.image_url}')">
+                            Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </article>
+        `).join('');
+    }
+
+    // Filter News Logic
+    const newsPills = document.querySelectorAll('.news-pill');
+    const newsSearchInput = document.getElementById('newsSearchInput');
+
+    function filterNewsList() {
+        const activePill = document.querySelector('.news-pill.active');
+        const selectedCategory = activePill ? activePill.getAttribute('data-category') : 'all';
+        const query = newsSearchInput ? newsSearchInput.value.toLowerCase().trim() : '';
+
+        const filtered = allNewsData.filter(item => {
+            const matchCategory = selectedCategory === 'all' || item.category === selectedCategory;
+            const matchQuery = item.title.toLowerCase().includes(query) || item.excerpt.toLowerCase().includes(query);
+            return matchCategory && matchQuery;
+        });
+
+        renderNewsGrid(filtered);
+    }
+
+    newsPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            newsPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            filterNewsList();
+        });
+    });
+
+    if (newsSearchInput) {
+        newsSearchInput.addEventListener('input', filterNewsList);
+    }
+
+    // Load Administrasi & Titik Lokasi Data
+    async function loadAdministrasiData() {
+        try {
+            const p = await window.dusunService.getAdministrasiPeta();
+            if (p) {
+                const petaTitle = document.getElementById('petaTitleDisplay');
+                if (petaTitle && p.map_title) petaTitle.textContent = p.map_title;
+
+                const petaDesc = document.getElementById('petaDescDisplay');
+                if (petaDesc && p.map_desc) petaDesc.textContent = p.map_desc;
+
+                const petaImg = document.getElementById('petaMainImg');
+                if (petaImg && p.map_image_url) petaImg.src = p.map_image_url;
+
+                const btnZoom = document.getElementById('btnZoomPeta');
+                if (btnZoom) btnZoom.onclick = () => window.openImageModal(p.map_image_url, p.map_title);
+
+                const imgWrapper = document.getElementById('petaImgWrapper');
+                if (imgWrapper) imgWrapper.onclick = () => window.openImageModal(p.map_image_url, p.map_title);
+            }
+
+            const lokasi = await window.dusunService.getTitikLokasi();
+            if (Array.isArray(lokasi)) {
+                renderLocationGrid(lokasi);
+            }
+        } catch (err) {
+            console.error('Error loading administrasi via Supabase SDK:', err);
+        }
+    }
+
+    let allLocationData = [];
+    function renderLocationGrid(locations) {
+        allLocationData = locations;
+        const container = document.getElementById('locationGrid');
+        if (!container) return;
+
+        container.innerHTML = locations.map(loc => `
+            <div class="location-card" data-category="${loc.category}">
+                <div class="location-img-box" onclick="openImageModal('${loc.image_url || 'assets/img/Masjid_Al-Falah.jpg'}', '${loc.title}')" title="Klik untuk perbesar foto">
+                    <img src="${loc.image_url || 'assets/img/Masjid_Al-Falah.jpg'}" alt="${loc.title}" class="location-img">
+                    <span class="location-badge ${loc.badge_color || 'blue'}">
+                        <i class="fa-solid ${loc.category === 'ibadah' ? 'fa-mosque' : 'fa-house-user'}"></i> ${loc.badge_label || loc.category}
+                    </span>
+                </div>
+                <div class="location-body">
+                    <h4 class="location-title">${loc.title}</h4>
+                    <p class="location-desc">${loc.description}</p>
+                    <div class="coordinate-info">
+                        <span class="coord-label"><i class="fa-solid fa-crosshairs"></i> Koordinat:</span>
+                        <span class="coord-val">${loc.coordinates}</span>
+                    </div>
+                    <a href="${loc.gmaps_url}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
+                        <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
+                    </a>
+                </div>
+            </div>
+        `).join('');
+
+        initLocationPills();
+    }
+
+    function initLocationPills() {
+        const locationPills = document.querySelectorAll('.location-pill');
+        locationPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                locationPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                const selectedCategory = pill.getAttribute('data-category');
+
+                document.querySelectorAll('#locationGrid .location-card').forEach(card => {
+                    const cat = card.getAttribute('data-category');
+                    if (selectedCategory === 'all' || cat === selectedCategory) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    }
+
+    // Load UMKM Data
+    let allUmkmData = [];
+    async function loadUmkmData() {
+        try {
+            const data = await window.dusunService.getUMKM();
+            if (Array.isArray(data)) {
+                allUmkmData = data;
+                renderUmkmGrid(allUmkmData);
+
+                const umkmCountEl = document.getElementById('berandaUmkmCountDisplay');
+                if (umkmCountEl) {
+                    umkmCountEl.textContent = `${allUmkmData.length} Usaha`;
+                }
+            }
+        } catch (err) {
+            console.error('Error loading UMKM via Supabase SDK:', err);
+        }
+    }
+
+    function renderUmkmGrid(umkmItems) {
+        const container = document.getElementById('umkmGrid');
+        if (!container) return;
+
+        if (umkmItems.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada UMKM terdaftar.</div>`;
+            return;
+        }
+
+        container.innerHTML = umkmItems.map(item => `
+            <div class="umkm-card" data-category="${item.category}">
+                <div class="umkm-img-box">
+                    ${item.image_url ? `
+                        <img src="${item.image_url}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">
+                    ` : `
+                        <div class="placeholder-image-box" style="border-radius: 0; min-height: 100%;">
+                            <span class="placeholder-tag">${item.category}</span>
+                            <div class="placeholder-icon"><i class="fa-solid fa-shop"></i></div>
+                            <h4 class="placeholder-title">${item.title}</h4>
+                        </div>
+                    `}
+                </div>
+                <div class="umkm-body">
+                    <span class="umkm-category-tag">${item.category}</span>
+                    <h3 class="umkm-title">${item.title}</h3>
+                    <div class="umkm-owner"><i class="fa-regular fa-user"></i> Pemilik: ${item.owner}</div>
+                    <p class="umkm-desc">${item.description}</p>
+                    <div class="umkm-footer">
+                        <div class="umkm-price">${item.price_str}</div>
+                        <a href="https://wa.me/${item.whatsapp}?text=${encodeURIComponent('Halo ' + item.owner + ', saya ingin pesan ' + item.title)}" target="_blank" class="btn-wa-order">
+                            <i class="fa-brands fa-whatsapp"></i> Pesan WA
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        initUmkmPills();
+    }
+
+    function initUmkmPills() {
+        const umkmPills = document.querySelectorAll('.umkm-pill');
+        umkmPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                umkmPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                const selectedCategory = pill.getAttribute('data-category');
+
+                document.querySelectorAll('#umkmGrid .umkm-card').forEach(card => {
+                    const cat = card.getAttribute('data-category');
+                    if (selectedCategory === 'all' || cat === selectedCategory) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    }
+
+    // Load Kontak Data
+    async function loadKontakData() {
+        try {
+            const k = await window.dusunService.getKontak();
+            if (k) {
+                const addr = document.getElementById('kontakAddressDisplay');
+                if (addr && k.address) addr.textContent = k.address;
+
+                const phone = document.getElementById('kontakPhoneDisplay');
+                if (phone && k.phone) phone.textContent = k.phone;
+
+                const email = document.getElementById('kontakEmailDisplay');
+                if (email && k.email) email.textContent = k.email;
+
+                const footerAddr = document.getElementById('footerAddressDisplay');
+                if (footerAddr && k.address) footerAddr.textContent = k.address;
+
+                const footerPhone = document.getElementById('footerPhoneDisplay');
+                if (footerPhone && k.phone) footerPhone.textContent = k.phone;
+
+                const footerEmail = document.getElementById('footerEmailDisplay');
+                if (footerEmail && k.email) footerEmail.textContent = k.email;
+
+                const iframe = document.getElementById('kontakGmapsIframe');
+                if (iframe && k.gmaps_embed) iframe.src = k.gmaps_embed;
+            }
+        } catch (err) {
+            console.error('Error loading kontak via Supabase SDK:', err);
+        }
+    }
+
+    // Handle Contact Form Submit
+    const contactForm = document.getElementById('mainContactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Terima kasih! Pesan/Aspirasi Anda telah terkirim kepada Perangkat Dusun Jambon.');
+            contactForm.reset();
+        });
+    }
+
+    // Initial section routing from URL hash
+    const initialHash = window.location.hash.replace('#', '');
+    if (initialHash && document.getElementById(initialHash)) {
+        switchSection(initialHash);
+    } else {
+        switchSection('beranda');
+    }
+
+    // Initialize all Backend Data Loads via Supabase JS SDK
+    loadBerandaData();
+    loadProfilData();
+    loadBeritaData();
+    loadAdministrasiData();
+    loadUmkmData();
+    loadKontakData();
 });

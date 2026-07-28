@@ -2,8 +2,8 @@
  * ============================================================================
  * ADMIN DASHBOARD SCRIPT - PORTAL DUSUN JAMBON
  * ============================================================================
- * Menangani autentikasi login admin, switching tab panel, manajemen form CRUD,
- * upload file gambar (Base64 / Data URL), render tabel data, dan Supabase sync.
+ * Handles tab navigation, Supabase Auth, CRUD operations, image uploads 
+ * directly via Supabase JS SDK (100% Client-Side, No PHP Dependency).
  * ============================================================================
  */
 
@@ -15,86 +15,131 @@ document.addEventListener('DOMContentLoaded', () => {
     const dbStatusBadge = document.getElementById('dbStatusBadge');
 
     // ----------------------------------------------------------------------
-    // 1. Image Upload Helper (Base64 Reader + Live Preview)
+    // 1. Toast Notification Helper
     // ----------------------------------------------------------------------
-    function bindImageUpload(fileInputId, textInputId, previewImgId) {
+    function showAdminToast(message) {
+        let toast = document.getElementById('adminToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'adminToast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                background: #059669;
+                color: #ffffff;
+                padding: 12px 24px;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+                z-index: 9999;
+                transition: opacity 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${message}`;
+        toast.style.opacity = '1';
+        toast.style.display = 'block';
+
         setTimeout(() => {
-            const fileInput = document.getElementById(fileInputId);
-            const textInput = document.getElementById(textInputId);
-            const previewImg = document.getElementById(previewImgId);
-
-            if (textInput && previewImg && textInput.value) {
-                previewImg.src = textInput.value;
-                previewImg.style.display = 'block';
-            }
-
-            if (fileInput) {
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (evt) => {
-                            const dataUrl = evt.target.result;
-                            if (textInput) textInput.value = dataUrl;
-                            if (previewImg) {
-                                previewImg.src = dataUrl;
-                                previewImg.style.display = 'block';
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            if (textInput && previewImg) {
-                textInput.addEventListener('input', () => {
-                    if (textInput.value) {
-                        previewImg.src = textInput.value;
-                        previewImg.style.display = 'block';
-                    } else {
-                        previewImg.style.display = 'none';
-                    }
-                });
-            }
-        }, 50);
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 300);
+        }, 3000);
     }
 
     // ----------------------------------------------------------------------
-    // 2. Authentication Session Check & Login Handler
+    // 2. Image Upload Helper via Supabase Storage JS SDK
     // ----------------------------------------------------------------------
-    function checkSession() {
-        const loggedIn = localStorage.getItem('dusun_admin_session');
-        if (loggedIn === 'true') {
-            loginSection.style.display = 'none';
-            adminDashboardSection.style.display = 'flex';
+    function bindImageUpload(fileInputId, textInputId, previewImgId) {
+        const fileInput = document.getElementById(fileInputId);
+        const textInput = document.getElementById(textInputId);
+        const previewImg = document.getElementById(previewImgId);
+
+        if (textInput && previewImg && textInput.value) {
+            previewImg.src = textInput.value;
+            previewImg.style.display = 'block';
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (previewImg) {
+                    previewImg.src = URL.createObjectURL(file);
+                    previewImg.style.display = 'block';
+                }
+
+                try {
+                    const uploadedUrl = await window.dusunService.uploadImageFile(file);
+                    if (textInput) textInput.value = uploadedUrl;
+                    if (previewImg) {
+                        previewImg.src = uploadedUrl;
+                        previewImg.style.display = 'block';
+                    }
+                    showAdminToast('Gambar berhasil diunggah ke Supabase Storage!');
+                } catch (err) {
+                    alert('Gagal mengunggah gambar: ' + (err.message || 'Error'));
+                }
+            });
+        }
+
+        if (textInput && previewImg) {
+            textInput.addEventListener('input', () => {
+                if (textInput.value.trim()) {
+                    previewImg.src = textInput.value.trim();
+                    previewImg.style.display = 'block';
+                } else {
+                    previewImg.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    bindImageUpload('berandaHeroImgFile', 'berandaHeroImg', 'berandaHeroImgPreview');
+    bindImageUpload('berandaKdImgFile', 'berandaKdImg', 'berandaKdImgPreview');
+    bindImageUpload('petaImgFile', 'petaImgUrl', 'petaImgPreview');
+
+    // ----------------------------------------------------------------------
+    // 3. Authentication Session Check & Login Handler (Supabase Auth)
+    // ----------------------------------------------------------------------
+    async function checkSession() {
+        const loggedIn = await window.dusunService.getAdminSession();
+        if (loggedIn) {
+            if (loginSection) loginSection.style.display = 'none';
+            if (adminDashboardSection) adminDashboardSection.style.display = 'flex';
             updateDbBadge();
             loadAllTabData();
         } else {
-            loginSection.style.display = 'flex';
-            adminDashboardSection.style.display = 'none';
+            if (loginSection) loginSection.style.display = 'flex';
+            if (adminDashboardSection) adminDashboardSection.style.display = 'none';
         }
     }
 
     if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', (e) => {
+        adminLoginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
-            if ((username === 'admin@dusunjambon.id' || username === 'admin') && password === 'admin123') {
-                localStorage.setItem('dusun_admin_session', 'true');
-                showAdminToast('Login berhasil! Selamat datang Admin Dusun Jambon.');
-                checkSession();
-            } else {
-                alert('Email atau Password salah! Gunakan admin@dusunjambon.id / admin123');
+            try {
+                const res = await window.dusunService.loginAdmin(username, password);
+                if (res && res.status === 'success') {
+                    showAdminToast('Login berhasil! Selamat datang Admin Dusun.');
+                    checkSession();
+                }
+            } catch (err) {
+                alert('Login Gagal: ' + (err.message || 'Email atau Password salah'));
             }
         });
     }
 
     if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
+        btnLogout.addEventListener('click', async (e) => {
+            e.preventDefault();
             if (confirm('Apakah Anda yakin ingin keluar dari Panel Admin?')) {
-                localStorage.removeItem('dusun_admin_session');
+                await window.dusunService.logoutAdmin();
                 checkSession();
             }
         });
@@ -107,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
             dbStatusBadge.innerHTML = `<i class="fa-solid fa-cloud"></i> Engine: PostgreSQL Supabase (Connected)`;
         } else {
             dbStatusBadge.className = 'db-status-badge local';
-            dbStatusBadge.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Engine: LocalStorage Fallback`;
+            dbStatusBadge.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Engine: LocalStorage Engine`;
         }
     }
 
     // ----------------------------------------------------------------------
-    // 3. Tab Panel Navigation System
+    // 4. Tab Panel Navigation System
     // ----------------------------------------------------------------------
     const navLinks = document.querySelectorAll('.admin-nav-link');
     const tabPanels = document.querySelectorAll('.admin-tab-panel');
@@ -124,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-berita': 'Pengelolaan Data Berita & Pengumuman',
         'tab-peta': 'Pengelolaan Peta Administrasi & Titik Lokasi Google Maps',
         'tab-umkm': 'Pengelolaan Katalog UMKM Warga',
+        'tab-kontak': 'Pengelolaan Informasi Kontak Dusun',
         'tab-supabase': 'Pengaturan Database Supabase (PostgreSQL)'
     };
 
@@ -151,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------------------------
-    // 4. Modal Admin Helper Functions
+    // 5. Modal Admin Helper Functions
     // ----------------------------------------------------------------------
     const adminModalBackdrop = document.getElementById('adminModalBackdrop');
     const adminModalTitle = document.getElementById('adminModalTitle');
@@ -174,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------------------
-    // 5. Data Loaders for All Tabs
+    // 6. Data Loaders for All Tabs via Supabase JS SDK
     // ----------------------------------------------------------------------
     async function loadAllTabData() {
         await loadBerandaTab();
@@ -182,28 +228,34 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadBeritaTab();
         await loadPetaTab();
         await loadUmkmTab();
-        loadSupabaseTab();
+        await loadKontakTab();
     }
 
     // A. TAB BERANDA
     async function loadBerandaTab() {
         try {
-            const data = await window.dusunService.getBeranda();
-            if (data) {
-                if (document.getElementById('berandaHeadline')) document.getElementById('berandaHeadline').value = data.hero_headline || '';
-                if (document.getElementById('berandaHeadlineSpan')) document.getElementById('berandaHeadlineSpan').value = data.hero_headline_span || '';
-                if (document.getElementById('berandaHeadlineRed')) document.getElementById('berandaHeadlineRed').value = data.hero_headline_red || '';
-                if (document.getElementById('berandaDesc')) document.getElementById('berandaDesc').value = data.hero_desc || '';
-                if (document.getElementById('berandaHeroImg')) document.getElementById('berandaHeroImg').value = data.hero_image_url || '';
-                if (document.getElementById('berandaHeroCap')) document.getElementById('berandaHeroCap').value = data.hero_image_caption || '';
-                if (document.getElementById('berandaKdTitle')) document.getElementById('berandaKdTitle').value = data.kepala_dusun_title || '';
-                if (document.getElementById('berandaKdSpeech1')) document.getElementById('berandaKdSpeech1').value = data.kepala_dusun_speech_1 || '';
-                if (document.getElementById('berandaKdSpeech2')) document.getElementById('berandaKdSpeech2').value = data.kepala_dusun_speech_2 || '';
-                if (document.getElementById('berandaKdName')) document.getElementById('berandaKdName').value = data.kepala_dusun_name || '';
-                if (document.getElementById('berandaKdImg')) document.getElementById('berandaKdImg').value = data.kepala_dusun_image_url || '';
+            const b = await window.dusunService.getBeranda();
+            if (b) {
+                if (document.getElementById('berandaHeadline')) document.getElementById('berandaHeadline').value = b.hero_headline || '';
+                if (document.getElementById('berandaHeadlineSpan')) document.getElementById('berandaHeadlineSpan').value = b.hero_headline_span || '';
+                if (document.getElementById('berandaHeadlineRed')) document.getElementById('berandaHeadlineRed').value = b.hero_headline_red || '';
+                if (document.getElementById('berandaDesc')) document.getElementById('berandaDesc').value = b.hero_desc || '';
+                if (document.getElementById('berandaHeroImg')) document.getElementById('berandaHeroImg').value = b.hero_image_url || '';
+                if (document.getElementById('berandaHeroCap')) document.getElementById('berandaHeroCap').value = b.hero_image_caption || '';
+                if (document.getElementById('berandaKdTitle')) document.getElementById('berandaKdTitle').value = b.kepala_dusun_title || '';
+                if (document.getElementById('berandaKdSpeech1')) document.getElementById('berandaKdSpeech1').value = b.kepala_dusun_speech_1 || '';
+                if (document.getElementById('berandaKdSpeech2')) document.getElementById('berandaKdSpeech2').value = b.kepala_dusun_speech_2 || '';
+                if (document.getElementById('berandaKdName')) document.getElementById('berandaKdName').value = b.kepala_dusun_name || '';
+                if (document.getElementById('berandaKdImg')) document.getElementById('berandaKdImg').value = b.kepala_dusun_image_url || '';
 
-                bindImageUpload('berandaHeroImgFile', 'berandaHeroImg', 'berandaHeroImgPreview');
-                bindImageUpload('berandaKdImgFile', 'berandaKdImg', 'berandaKdImgPreview');
+                if (b.hero_image_url && document.getElementById('berandaHeroImgPreview')) {
+                    document.getElementById('berandaHeroImgPreview').src = b.hero_image_url;
+                    document.getElementById('berandaHeroImgPreview').style.display = 'block';
+                }
+                if (b.kepala_dusun_image_url && document.getElementById('berandaKdImgPreview')) {
+                    document.getElementById('berandaKdImgPreview').src = b.kepala_dusun_image_url;
+                    document.getElementById('berandaKdImgPreview').style.display = 'block';
+                }
             }
         } catch (err) {
             console.error('Error loading Beranda tab:', err);
@@ -230,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await window.dusunService.updateBeranda(payload);
-                showAdminToast('Beranda berhasil diperbarui!');
+                showAdminToast('Halaman Beranda berhasil diperbarui!');
             } catch (err) {
                 alert('Gagal menyimpan beranda: ' + err.message);
             }
@@ -240,30 +292,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // B. TAB PROFIL & GALERI
     async function loadProfilTab() {
         try {
-            const profil = await window.dusunService.getProfil();
-            if (profil) {
-                if (document.getElementById('profilSejarah1')) document.getElementById('profilSejarah1').value = profil.sejarah_p1 || '';
-                if (document.getElementById('profilSejarah2')) document.getElementById('profilSejarah2').value = profil.sejarah_p2 || '';
-                if (document.getElementById('profilVisi')) document.getElementById('profilVisi').value = profil.visi_text || '';
-                if (document.getElementById('profilMisi')) document.getElementById('profilMisi').value = Array.isArray(profil.misi_list) ? profil.misi_list.join('\n') : '';
+            const p = await window.dusunService.getProfil();
+            if (p) {
+                if (document.getElementById('profilSejarah1')) document.getElementById('profilSejarah1').value = p.sejarah_p1 || '';
+                if (document.getElementById('profilSejarah2')) document.getElementById('profilSejarah2').value = p.sejarah_p2 || '';
+                if (document.getElementById('profilVisi')) document.getElementById('profilVisi').value = p.visi_text || '';
+                let list = p.misi_list;
+                if (typeof list === 'string') {
+                    try { list = JSON.parse(list); } catch (e) { list = []; }
+                }
+                if (Array.isArray(list)) {
+                    if (document.getElementById('profilMisi')) document.getElementById('profilMisi').value = list.join('\n');
+                }
             }
-
             const gallery = await window.dusunService.getProfilGallery();
-            const tbody = document.getElementById('profilGalleryTableBody');
-            if (tbody) {
-                tbody.innerHTML = (gallery || []).map(item => `
-                    <tr>
-                        <td><img src="${item.image_url}" class="table-img-thumb" onerror="this.src='assets/kegiatan1.jpg'"></td>
-                        <td><strong>${item.title}</strong><br><small style="color: var(--admin-text-muted);">${item.subtitle || ''}</small></td>
-                        <td><span class="db-status-badge local">${item.tag}</span></td>
-                        <td><strong>${item.type}</strong></td>
-                        <td>
-                            <button class="btn-action-edit" onclick="editGalleryItem(${item.id})"><i class="fa-solid fa-pen"></i> Edit</button>
-                            <button class="btn-action-delete" onclick="deleteGalleryItem(${item.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+            renderGalleryTable(gallery || []);
         } catch (err) {
             console.error('Error loading Profil tab:', err);
         }
@@ -273,264 +316,268 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formProfil) {
         formProfil.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const misiArr = document.getElementById('profilMisi').value.split('\n').filter(x => x.trim().length > 0);
             const payload = {
                 sejarah_p1: document.getElementById('profilSejarah1').value,
                 sejarah_p2: document.getElementById('profilSejarah2').value,
                 visi_text: document.getElementById('profilVisi').value,
-                misi_list: misiArr
+                misi_list: document.getElementById('profilMisi').value
             };
 
             try {
                 await window.dusunService.updateProfil(payload);
-                showAdminToast('Data Profil & Visi Misi berhasil diperbarui!');
+                showAdminToast('Data Profil berhasil diperbarui!');
             } catch (err) {
                 alert('Gagal menyimpan profil: ' + err.message);
             }
         });
     }
 
+    function renderGalleryTable(items) {
+        const tbody = document.getElementById('profilGalleryTableBody');
+        if (!tbody) return;
+
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--admin-text-muted);">Belum ada foto galeri.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td><img src="${item.image_url}" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
+                <td><strong>${item.title}</strong><br><small style="color:var(--admin-text-muted);">${item.subtitle || ''}</small></td>
+                <td><span class="admin-badge blue">${item.tag || 'Kegiatan'}</span></td>
+                <td><code>${item.type || 'gallery'}</code></td>
+                <td>
+                    <button class="btn-action-edit" onclick="editGalleryModal(${item.id}, '${encodeURIComponent(JSON.stringify(item))}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action-delete" onclick="deleteGalleryItem(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
     window.openAddGalleryModal = function () {
-        const html = `
-            <form id="formModalGallery" onsubmit="saveGalleryModal(event)">
-                <input type="hidden" id="galId" value="">
+        openAdminModal('Tambah Foto Galeri / Slideshow', `
+            <form id="formAddGallery">
+                <input type="hidden" id="mgId" value="0">
                 <div class="admin-form-group">
                     <label>Judul / Caption Foto</label>
-                    <input type="text" id="galTitle" class="admin-form-control" required>
+                    <input type="text" id="mgTitle" class="admin-form-control" required>
                 </div>
                 <div class="admin-form-group">
-                    <label>Sub-judul / Deskripsi Singkat</label>
-                    <input type="text" id="galSubtitle" class="admin-form-control">
+                    <label>Sub-Judul / Keterangan</label>
+                    <input type="text" id="mgSubtitle" class="admin-form-control">
                 </div>
-                <div class="admin-form-group">
-                    <label>Tag / Label Kategori</label>
-                    <input type="text" id="galTag" class="admin-form-control" placeholder="Kegiatan 1" required>
-                </div>
-                <div class="admin-form-group">
-                    <label><i class="fa-solid fa-upload"></i> Upload / Pilih Gambar Foto Galeri</label>
-                    <input type="file" id="galImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
-                    <input type="text" id="galImgUrl" class="admin-form-control" placeholder="assets/kegiatan1.jpg atau Upload File" required>
-                    <div style="margin-top: 10px;">
-                        <img id="galImgPreview" src="" style="max-height: 100px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                <div class="form-grid-2">
+                    <div class="admin-form-group">
+                        <label>Tag / Kategori</label>
+                        <input type="text" id="mgTag" class="admin-form-control" value="Kegiatan">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Tipe Display</label>
+                        <select id="mgType" class="admin-form-control">
+                            <option value="gallery">Galeri Foto Grid</option>
+                            <option value="slideshow">Slideshow Banner</option>
+                        </select>
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label>Tipe Tampilan</label>
-                    <select id="galType" class="admin-form-control">
-                        <option value="slideshow">Slideshow Sejarah</option>
-                        <option value="gallery">Galeri Dokumentasi</option>
-                    </select>
+                    <label><i class="fa-solid fa-upload"></i> Upload Foto (Supabase Storage)</label>
+                    <input type="file" id="mgImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                    <input type="text" id="mgImg" class="admin-form-control" placeholder="URL Foto" required>
+                    <div style="margin-top: 10px;">
+                        <img id="mgImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                    </div>
                 </div>
-                <button type="submit" class="btn-admin-submit" style="width: 100%; justify-content: center; margin-top: 10px;">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan Foto
-                </button>
+                <button type="submit" class="btn-admin-submit"><i class="fa-solid fa-floppy-disk"></i> Simpan Foto Galeri</button>
             </form>
-        `;
-        openAdminModal('Tambah Foto Galeri / Slideshow Baru', html);
-        bindImageUpload('galImgFile', 'galImgUrl', 'galImgPreview');
-    };
+        `);
 
-    window.editGalleryItem = async function (id) {
-        const list = await window.dusunService.getProfilGallery();
-        const item = list.find(x => x.id === id);
-        if (!item) return;
+        bindImageUpload('mgImgFile', 'mgImg', 'mgImgPreview');
 
-        openAddGalleryModal();
-        document.getElementById('galId').value = item.id;
-        document.getElementById('galTitle').value = item.title;
-        document.getElementById('galSubtitle').value = item.subtitle || '';
-        document.getElementById('galTag').value = item.tag;
-        document.getElementById('galImgUrl').value = item.image_url;
-        document.getElementById('galType').value = item.type;
-        document.getElementById('adminModalTitle').textContent = 'Edit Foto Galeri / Slideshow';
-        bindImageUpload('galImgFile', 'galImgUrl', 'galImgPreview');
-    };
+        document.getElementById('formAddGallery').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('mgId').value);
+            const payload = {
+                id: id,
+                title: document.getElementById('mgTitle').value,
+                subtitle: document.getElementById('mgSubtitle').value,
+                tag: document.getElementById('mgTag').value,
+                type: document.getElementById('mgType').value,
+                image_url: document.getElementById('mgImg').value
+            };
 
-    window.saveGalleryModal = async function (e) {
-        e.preventDefault();
-        const id = document.getElementById('galId').value;
-        const item = {
-            title: document.getElementById('galTitle').value,
-            subtitle: document.getElementById('galSubtitle').value,
-            tag: document.getElementById('galTag').value,
-            image_url: document.getElementById('galImgUrl').value,
-            type: document.getElementById('galType').value
-        };
-        if (id) item.id = parseInt(id, 10);
-
-        try {
-            await window.dusunService.saveProfilGalleryItem(item);
+            await window.dusunService.saveProfilGalleryItem(payload);
+            showAdminToast('Foto galeri berhasil disimpan!');
             closeAdminModal();
             loadProfilTab();
-            showAdminToast('Foto galeri berhasil disimpan!');
-        } catch (err) {
-            alert('Gagal menyimpan item: ' + err.message);
+        });
+    };
+
+    window.editGalleryModal = function (id, encodedObj) {
+        const item = JSON.parse(decodeURIComponent(encodedObj));
+        openAddGalleryModal();
+        document.getElementById('adminModalTitle').textContent = 'Edit Foto Galeri';
+        document.getElementById('mgId').value = item.id;
+        document.getElementById('mgTitle').value = item.title;
+        document.getElementById('mgSubtitle').value = item.subtitle || '';
+        document.getElementById('mgTag').value = item.tag || 'Kegiatan';
+        document.getElementById('mgType').value = item.type || 'gallery';
+        document.getElementById('mgImg').value = item.image_url;
+        if (item.image_url && document.getElementById('mgImgPreview')) {
+            document.getElementById('mgImgPreview').src = item.image_url;
+            document.getElementById('mgImgPreview').style.display = 'block';
         }
     };
 
     window.deleteGalleryItem = async function (id) {
-        if (confirm('Hapus foto ini dari galeri profil?')) {
-            await window.dusunService.deleteProfilGalleryItem(id);
-            loadProfilTab();
-            showAdminToast('Foto berhasil dihapus.');
-        }
+        if (!confirm('Hapus foto ini dari galeri?')) return;
+        await window.dusunService.deleteProfilGalleryItem(id);
+        showAdminToast('Foto galeri dihapus');
+        loadProfilTab();
     };
 
-    // C. TAB BERITA DUSUN
+    // C. TAB BERITA
     async function loadBeritaTab() {
         try {
-            const list = await window.dusunService.getBerita();
-            const tbody = document.getElementById('beritaTableBody');
-            if (tbody) {
-                tbody.innerHTML = (list || []).map(b => `
-                    <tr>
-                        <td><strong>${b.title}</strong></td>
-                        <td><span class="db-status-badge supabase">${b.category}</span></td>
-                        <td>${b.date_str}</td>
-                        <td>${b.author || 'Admin'}</td>
-                        <td><small style="color: var(--admin-text-muted);">${(b.excerpt || '').substring(0, 50)}...</small></td>
-                        <td>
-                            <button class="btn-action-edit" onclick="editBerita(${b.id})"><i class="fa-solid fa-pen"></i> Edit</button>
-                            <button class="btn-action-delete" onclick="deleteBerita(${b.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+            const data = await window.dusunService.getBerita();
+            renderBeritaTable(data || []);
         } catch (err) {
             console.error('Error loading Berita tab:', err);
         }
     }
 
+    function renderBeritaTable(items) {
+        const tbody = document.getElementById('beritaTableBody');
+        if (!tbody) return;
+
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--admin-text-muted);">Belum ada data berita.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td><strong>${item.title}</strong></td>
+                <td><span class="admin-badge red">${item.category}</span></td>
+                <td>${item.date_str}</td>
+                <td>${item.author}</td>
+                <td><small style="color:var(--admin-text-muted);">${(item.excerpt || '').substring(0, 45)}...</small></td>
+                <td>
+                    <button class="btn-action-edit" onclick="editBeritaModal(${item.id}, '${encodeURIComponent(JSON.stringify(item))}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action-delete" onclick="deleteBeritaItem(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
     window.openAddBeritaModal = function () {
-        const html = `
-            <form id="formModalBerita" onsubmit="saveBeritaModal(event)">
-                <input type="hidden" id="beritaId" value="">
+        openAdminModal('Tambah Berita Baru', `
+            <form id="formAddBerita">
+                <input type="hidden" id="mbId" value="0">
                 <div class="admin-form-group">
-                    <label>Judul Berita / Pengumuman</label>
-                    <input type="text" id="beritaTitleInput" class="admin-form-control" required>
+                    <label>Judul Berita</label>
+                    <input type="text" id="mbTitle" class="admin-form-control" required>
                 </div>
                 <div class="form-grid-2">
                     <div class="admin-form-group">
                         <label>Kategori</label>
-                        <select id="beritaCategory" class="admin-form-control">
+                        <select id="mbCategory" class="admin-form-control">
                             <option value="kegiatan">Kegiatan Warga</option>
                             <option value="pembangunan">Pembangunan</option>
                             <option value="pengumuman">Pengumuman</option>
                         </select>
                     </div>
                     <div class="admin-form-group">
-                        <label>Tanggal Rilis</label>
-                        <input type="text" id="beritaDate" class="admin-form-control" placeholder="27 Juli 2026" required>
+                        <label>Penulis</label>
+                        <input type="text" id="mbAuthor" class="admin-form-control" value="Pengurus Dusun">
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label>Penulis / Pengirim</label>
-                    <input type="text" id="beritaAuthor" class="admin-form-control" placeholder="Sekretaris Dusun" required>
+                    <label>Tanggal Berita</label>
+                    <input type="text" id="mbDate" class="admin-form-control" value="${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}">
                 </div>
                 <div class="admin-form-group">
-                    <label>Ringkasan Singkat (Excerpt)</label>
-                    <textarea id="beritaExcerpt" class="admin-form-control" rows="2" required></textarea>
+                    <label><i class="fa-solid fa-upload"></i> Upload Thumbnail Gambar (Supabase Storage)</label>
+                    <input type="file" id="mbImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                    <input type="text" id="mbImg" class="admin-form-control" placeholder="URL Gambar Thumbnail">
+                    <div style="margin-top: 10px;">
+                        <img id="mbImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label>Ringkasan Berita (Excerpt)</label>
+                    <textarea id="mbExcerpt" class="admin-form-control" rows="2" required></textarea>
                 </div>
                 <div class="admin-form-group">
                     <label>Isi Lengkap Berita</label>
-                    <textarea id="beritaContent" class="admin-form-control" rows="5" required></textarea>
+                    <textarea id="mbContent" class="admin-form-control" rows="5" required></textarea>
                 </div>
-                <div class="admin-form-group">
-                    <label><i class="fa-solid fa-upload"></i> Upload / Pilih Gambar Berita (Opsional)</label>
-                    <input type="file" id="beritaImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
-                    <input type="text" id="beritaImg" class="admin-form-control" placeholder="assets/kegiatan1.jpg atau Upload File">
-                    <div style="margin-top: 10px;">
-                        <img id="beritaImgPreview" src="" style="max-height: 100px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
-                    </div>
-                </div>
-                <button type="submit" class="btn-admin-submit" style="width: 100%; justify-content: center; margin-top: 10px;">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan Berita
-                </button>
+                <button type="submit" class="btn-admin-submit"><i class="fa-solid fa-floppy-disk"></i> Simpan Berita</button>
             </form>
-        `;
-        openAdminModal('Tambah Berita / Pengumuman Baru', html);
-        bindImageUpload('beritaImgFile', 'beritaImg', 'beritaImgPreview');
-    };
+        `);
 
-    window.editBerita = async function (id) {
-        const list = await window.dusunService.getBerita();
-        const b = list.find(x => x.id === id);
-        if (!b) return;
+        bindImageUpload('mbImgFile', 'mbImg', 'mbImgPreview');
 
-        openAddBeritaModal();
-        document.getElementById('beritaId').value = b.id;
-        document.getElementById('beritaTitleInput').value = b.title;
-        document.getElementById('beritaCategory').value = b.category;
-        document.getElementById('beritaDate').value = b.date_str;
-        document.getElementById('beritaAuthor').value = b.author || '';
-        document.getElementById('beritaExcerpt').value = b.excerpt;
-        document.getElementById('beritaContent').value = b.content;
-        document.getElementById('beritaImg').value = b.image_url || '';
-        document.getElementById('adminModalTitle').textContent = 'Edit Data Berita';
-        bindImageUpload('beritaImgFile', 'beritaImg', 'beritaImgPreview');
-    };
+        document.getElementById('formAddBerita').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: parseInt(document.getElementById('mbId').value),
+                title: document.getElementById('mbTitle').value,
+                category: document.getElementById('mbCategory').value,
+                author: document.getElementById('mbAuthor').value,
+                date_str: document.getElementById('mbDate').value,
+                image_url: document.getElementById('mbImg').value,
+                excerpt: document.getElementById('mbExcerpt').value,
+                content: document.getElementById('mbContent').value
+            };
 
-    window.saveBeritaModal = async function (e) {
-        e.preventDefault();
-        const id = document.getElementById('beritaId').value;
-        const item = {
-            title: document.getElementById('beritaTitleInput').value,
-            category: document.getElementById('beritaCategory').value,
-            date_str: document.getElementById('beritaDate').value,
-            author: document.getElementById('beritaAuthor').value,
-            excerpt: document.getElementById('beritaExcerpt').value,
-            content: document.getElementById('beritaContent').value,
-            image_url: document.getElementById('beritaImg').value
-        };
-        if (id) item.id = parseInt(id, 10);
-
-        try {
-            await window.dusunService.saveBerita(item);
+            await window.dusunService.saveBerita(payload);
+            showAdminToast('Berita berhasil disimpan!');
             closeAdminModal();
             loadBeritaTab();
-            showAdminToast('Berita berhasil disimpan!');
-        } catch (err) {
-            alert('Gagal menyimpan berita: ' + err.message);
-        }
+        });
     };
 
-    window.deleteBerita = async function (id) {
-        if (confirm('Hapus artikel berita ini?')) {
-            await window.dusunService.deleteBerita(id);
-            loadBeritaTab();
-            showAdminToast('Berita berhasil dihapus.');
+    window.editBeritaModal = function (id, encodedObj) {
+        const b = JSON.parse(decodeURIComponent(encodedObj));
+        openAddBeritaModal();
+        document.getElementById('adminModalTitle').textContent = 'Edit Data Berita';
+        document.getElementById('mbId').value = b.id;
+        document.getElementById('mbTitle').value = b.title;
+        document.getElementById('mbCategory').value = b.category;
+        document.getElementById('mbAuthor').value = b.author;
+        document.getElementById('mbDate').value = b.date_str;
+        document.getElementById('mbImg').value = b.image_url || '';
+        if (b.image_url && document.getElementById('mbImgPreview')) {
+            document.getElementById('mbImgPreview').src = b.image_url;
+            document.getElementById('mbImgPreview').style.display = 'block';
         }
+        document.getElementById('mbExcerpt').value = b.excerpt;
+        document.getElementById('mbContent').value = b.content;
+    };
+
+    window.deleteBeritaItem = async function (id) {
+        if (!confirm('Hapus berita ini?')) return;
+        await window.dusunService.deleteBerita(id);
+        showAdminToast('Berita dihapus');
+        loadBeritaTab();
     };
 
     // D. TAB PETA & TITIK LOKASI
     async function loadPetaTab() {
         try {
-            const peta = await window.dusunService.getAdministrasiPeta();
-            if (peta) {
-                if (document.getElementById('petaTitle')) document.getElementById('petaTitle').value = peta.map_title || '';
-                if (document.getElementById('petaDesc')) document.getElementById('petaDesc').value = peta.map_desc || '';
-                if (document.getElementById('petaImgUrl')) document.getElementById('petaImgUrl').value = peta.map_image_url || '';
-
-                bindImageUpload('petaImgFile', 'petaImgUrl', 'petaImgPreview');
+            const p = await window.dusunService.getAdministrasiPeta();
+            if (p) {
+                if (document.getElementById('petaTitle')) document.getElementById('petaTitle').value = p.map_title || '';
+                if (document.getElementById('petaDesc')) document.getElementById('petaDesc').value = p.map_desc || '';
+                if (document.getElementById('petaImgUrl')) document.getElementById('petaImgUrl').value = p.map_image_url || '';
+                if (p.map_image_url && document.getElementById('petaImgPreview')) {
+                    document.getElementById('petaImgPreview').src = p.map_image_url;
+                    document.getElementById('petaImgPreview').style.display = 'block';
+                }
             }
-
-            const list = await window.dusunService.getTitikLokasi();
-            const tbody = document.getElementById('lokasiTableBody');
-            if (tbody) {
-                tbody.innerHTML = (list || []).map(l => `
-                    <tr>
-                        <td><img src="${l.image_url}" class="table-img-thumb" onerror="this.src='assets/Masjid_Al-Falah.jpg'"></td>
-                        <td><strong>${l.title}</strong><br><small style="color: var(--admin-text-muted);">${(l.description || '').substring(0, 40)}...</small></td>
-                        <td><span class="db-status-badge ${l.badge_color === 'red' ? 'supabase' : 'local'}">${l.badge_label || l.category}</span></td>
-                        <td><code>${l.coordinates}</code></td>
-                        <td><a href="${l.gmaps_url}" target="_blank" style="color: var(--admin-accent-blue);"><i class="fa-solid fa-up-right-from-square"></i> Buka Maps</a></td>
-                        <td>
-                            <button class="btn-action-edit" onclick="editLokasi(${l.id})"><i class="fa-solid fa-pen"></i> Edit</button>
-                            <button class="btn-action-delete" onclick="deleteLokasi(${l.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+            const lokasi = await window.dusunService.getTitikLokasi();
+            renderLokasiTable(lokasi || []);
         } catch (err) {
             console.error('Error loading Peta tab:', err);
         }
@@ -555,287 +602,307 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderLokasiTable(items) {
+        const tbody = document.getElementById('lokasiTableBody');
+        if (!tbody) return;
+
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--admin-text-muted);">Belum ada titik lokasi.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td><img src="${item.image_url || 'assets/img/Masjid_Al-Falah.jpg'}" style="width: 45px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
+                <td><strong>${item.title}</strong></td>
+                <td><span class="admin-badge ${item.badge_color || 'blue'}">${item.badge_label || item.category}</span></td>
+                <td><code>${item.coordinates}</code></td>
+                <td><a href="${item.gmaps_url}" target="_blank" style="color:var(--admin-accent-blue); text-decoration:none;"><i class="fa-solid fa-map-pin"></i> Maps</a></td>
+                <td>
+                    <button class="btn-action-edit" onclick="editLokasiModal(${item.id}, '${encodeURIComponent(JSON.stringify(item))}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action-delete" onclick="deleteLokasiItem(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
     window.openAddLokasiModal = function () {
-        const html = `
-            <form id="formModalLokasi" onsubmit="saveLokasiModal(event)">
-                <input type="hidden" id="lokasiId" value="">
+        openAdminModal('Tambah Titik Lokasi Penting', `
+            <form id="formAddLokasi">
+                <input type="hidden" id="mlId" value="0">
                 <div class="admin-form-group">
-                    <label>Nama Tempat / Titik Lokasi</label>
-                    <input type="text" id="lokasiTitle" class="admin-form-control" placeholder="Masjid Al-Falah" required>
+                    <label>Nama Lokasi</label>
+                    <input type="text" id="mlTitle" class="admin-form-control" placeholder="Contoh: Rumah RT 01" required>
                 </div>
                 <div class="form-grid-2">
                     <div class="admin-form-group">
                         <label>Kategori</label>
-                        <select id="lokasiCategory" class="admin-form-control">
+                        <select id="mlCategory" class="admin-form-control">
+                            <option value="rt">Pengurus RT</option>
                             <option value="ibadah">Tempat Ibadah</option>
-                            <option value="rt">Kediaman Ketua RT</option>
                         </select>
                     </div>
                     <div class="admin-form-group">
-                        <label>Warna Badge Label</label>
-                        <select id="lokasiBadgeColor" class="admin-form-control">
-                            <option value="red">Merah (Ibadah/Penting)</option>
-                            <option value="blue">Biru (RT/Pelayanan)</option>
+                        <label>Label Badge</label>
+                        <input type="text" id="mlBadge" class="admin-form-control" placeholder="Pengurus RT 01">
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="admin-form-group">
+                        <label>Warna Badge</label>
+                        <select id="mlColor" class="admin-form-control">
+                            <option value="blue">Biru (RT)</option>
+                            <option value="red">Merah (Ibadah)</option>
                         </select>
                     </div>
-                </div>
-                <div class="admin-form-group">
-                    <label>Teks Label Badge</label>
-                    <input type="text" id="lokasiBadgeLabel" class="admin-form-control" placeholder="Pengurus RT 01" required>
-                </div>
-                <div class="admin-form-group">
-                    <label>Deskripsi Singkat Lokasi</label>
-                    <textarea id="lokasiDesc" class="admin-form-control" rows="2" required></textarea>
-                </div>
-                <div class="admin-form-group">
-                    <label>Koordinat (Latitude, Longitude)</label>
-                    <input type="text" id="lokasiCoords" class="admin-form-control" placeholder="-7.662602, 110.26933" required>
-                </div>
-                <div class="admin-form-group">
-                    <label>Link Google Maps Direct URL</label>
-                    <input type="url" id="lokasiGmaps" class="admin-form-control" placeholder="https://www.google.com/maps?q=-7.662602,110.26933" required>
-                </div>
-                <div class="admin-form-group">
-                    <label><i class="fa-solid fa-upload"></i> Upload / Pilih Foto Lokasi / Rumah RT</label>
-                    <input type="file" id="lokasiImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
-                    <input type="text" id="lokasiImg" class="admin-form-control" placeholder="assets/Masjid_Al-Falah.jpg atau Upload File" required>
-                    <div style="margin-top: 10px;">
-                        <img id="lokasiImgPreview" src="" style="max-height: 100px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                    <div class="admin-form-group">
+                        <label>Koordinat Lat, Lng</label>
+                        <input type="text" id="mlCoords" class="admin-form-control" placeholder="-7.661971, 110.268369" required>
                     </div>
                 </div>
-                <button type="submit" class="btn-admin-submit" style="width: 100%; justify-content: center; margin-top: 10px;">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan Titik Lokasi
-                </button>
+                <div class="admin-form-group">
+                    <label>URL Google Maps</label>
+                    <input type="text" id="mlGmaps" class="admin-form-control" placeholder="https://www.google.com/maps?q=..." required>
+                </div>
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-upload"></i> Upload Foto Lokasi (Supabase Storage)</label>
+                    <input type="file" id="mlImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                    <input type="text" id="mlImg" class="admin-form-control" placeholder="URL Foto Lokasi">
+                    <div style="margin-top: 10px;">
+                        <img id="mlImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label>Deskripsi Lokasi</label>
+                    <textarea id="mlDesc" class="admin-form-control" rows="2" required></textarea>
+                </div>
+                <button type="submit" class="btn-admin-submit"><i class="fa-solid fa-floppy-disk"></i> Simpan Titik Lokasi</button>
             </form>
-        `;
-        openAdminModal('Tambah Titik Lokasi Penting & Koordinat', html);
-        bindImageUpload('lokasiImgFile', 'lokasiImg', 'lokasiImgPreview');
-    };
+        `);
 
-    window.editLokasi = async function (id) {
-        const list = await window.dusunService.getTitikLokasi();
-        const l = list.find(x => x.id === id);
-        if (!l) return;
+        bindImageUpload('mlImgFile', 'mlImg', 'mlImgPreview');
 
-        openAddLokasiModal();
-        document.getElementById('lokasiId').value = l.id;
-        document.getElementById('lokasiTitle').value = l.title;
-        document.getElementById('lokasiCategory').value = l.category;
-        document.getElementById('lokasiBadgeColor').value = l.badge_color || 'blue';
-        document.getElementById('lokasiBadgeLabel').value = l.badge_label;
-        document.getElementById('lokasiDesc').value = l.description;
-        document.getElementById('lokasiCoords').value = l.coordinates;
-        document.getElementById('lokasiGmaps').value = l.gmaps_url;
-        document.getElementById('lokasiImg').value = l.image_url;
-        document.getElementById('adminModalTitle').textContent = 'Edit Titik Lokasi & Koordinat';
-        bindImageUpload('lokasiImgFile', 'lokasiImg', 'lokasiImgPreview');
-    };
+        document.getElementById('formAddLokasi').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('mlId').value);
+            const payload = {
+                id: id,
+                title: document.getElementById('mlTitle').value,
+                category: document.getElementById('mlCategory').value,
+                badge_label: document.getElementById('mlBadge').value,
+                badge_color: document.getElementById('mlColor').value,
+                coordinates: document.getElementById('mlCoords').value,
+                gmaps_url: document.getElementById('mlGmaps').value,
+                image_url: document.getElementById('mlImg').value,
+                description: document.getElementById('mlDesc').value
+            };
 
-    window.saveLokasiModal = async function (e) {
-        e.preventDefault();
-        const id = document.getElementById('lokasiId').value;
-        const item = {
-            title: document.getElementById('lokasiTitle').value,
-            category: document.getElementById('lokasiCategory').value,
-            badge_color: document.getElementById('lokasiBadgeColor').value,
-            badge_label: document.getElementById('lokasiBadgeLabel').value,
-            description: document.getElementById('lokasiDesc').value,
-            coordinates: document.getElementById('lokasiCoords').value,
-            gmaps_url: document.getElementById('lokasiGmaps').value,
-            image_url: document.getElementById('lokasiImg').value
-        };
-        if (id) item.id = parseInt(id, 10);
-
-        try {
-            await window.dusunService.saveTitikLokasi(item);
+            await window.dusunService.saveTitikLokasi(payload);
+            showAdminToast('Titik lokasi berhasil disimpan!');
             closeAdminModal();
             loadPetaTab();
-            showAdminToast('Titik lokasi berhasil disimpan!');
-        } catch (err) {
-            alert('Gagal menyimpan lokasi: ' + err.message);
-        }
+        });
     };
 
-    window.deleteLokasi = async function (id) {
-        if (confirm('Hapus titik lokasi koordinat ini?')) {
-            await window.dusunService.deleteTitikLokasi(id);
-            loadPetaTab();
-            showAdminToast('Titik lokasi dihapus.');
+    window.editLokasiModal = function (id, encodedObj) {
+        const item = JSON.parse(decodeURIComponent(encodedObj));
+        openAddLokasiModal();
+        document.getElementById('adminModalTitle').textContent = 'Edit Titik Lokasi';
+        document.getElementById('mlId').value = item.id;
+        document.getElementById('mlTitle').value = item.title;
+        document.getElementById('mlCategory').value = item.category;
+        document.getElementById('mlBadge').value = item.badge_label || '';
+        document.getElementById('mlColor').value = item.badge_color || 'blue';
+        document.getElementById('mlCoords').value = item.coordinates;
+        document.getElementById('mlGmaps').value = item.gmaps_url;
+        document.getElementById('mlImg').value = item.image_url || '';
+        if (item.image_url && document.getElementById('mlImgPreview')) {
+            document.getElementById('mlImgPreview').src = item.image_url;
+            document.getElementById('mlImgPreview').style.display = 'block';
         }
+        document.getElementById('mlDesc').value = item.description;
+    };
+
+    window.deleteLokasiItem = async function (id) {
+        if (!confirm('Hapus titik lokasi ini?')) return;
+        await window.dusunService.deleteTitikLokasi(id);
+        showAdminToast('Titik lokasi dihapus');
+        loadPetaTab();
     };
 
     // E. TAB UMKM
     async function loadUmkmTab() {
         try {
-            const list = await window.dusunService.getUMKM();
-            const tbody = document.getElementById('umkmTableBody');
-            if (tbody) {
-                tbody.innerHTML = (list || []).map(u => `
-                    <tr>
-                        <td><img src="${u.image_url || 'assets/kegiatan1.jpg'}" class="table-img-thumb" onerror="this.src='assets/kegiatan1.jpg'"></td>
-                        <td><strong>${u.title}</strong></td>
-                        <td>${u.owner}</td>
-                        <td><span class="db-status-badge supabase">${u.category}</span></td>
-                        <td>${u.price_str}</td>
-                        <td><code>+${u.whatsapp}</code></td>
-                        <td>
-                            <button class="btn-action-edit" onclick="editUmkm(${u.id})"><i class="fa-solid fa-pen"></i> Edit</button>
-                            <button class="btn-action-delete" onclick="deleteUmkm(${u.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+            const data = await window.dusunService.getUMKM();
+            renderUmkmTable(data || []);
         } catch (err) {
             console.error('Error loading UMKM tab:', err);
         }
     }
 
+    function renderUmkmTable(items) {
+        const tbody = document.getElementById('umkmTableBody');
+        if (!tbody) return;
+
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--admin-text-muted);">Belum ada data UMKM.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td><img src="${item.image_url || 'assets/img/Masjid_Al-Falah.jpg'}" style="width: 45px; height: 35px; object-fit: cover; border-radius: 6px;"></td>
+                <td><strong>${item.title}</strong></td>
+                <td>${item.owner}</td>
+                <td><span class="admin-badge blue">${item.category}</span></td>
+                <td><strong style="color:var(--admin-accent-green);">${item.price_str}</strong></td>
+                <td><code>${item.whatsapp}</code></td>
+                <td>
+                    <button class="btn-action-edit" onclick="editUmkmModal(${item.id}, '${encodeURIComponent(JSON.stringify(item))}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action-delete" onclick="deleteUmkmItem(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
     window.openAddUmkmAdminModal = function () {
-        const html = `
-            <form id="formModalUmkm" onsubmit="saveUmkmModal(event)">
-                <input type="hidden" id="umkmId" value="">
+        openAdminModal('Tambah UMKM Baru', `
+            <form id="formAddUmkm">
+                <input type="hidden" id="muId" value="0">
                 <div class="admin-form-group">
-                    <label>Nama Usaha / Produk UMKM</label>
-                    <input type="text" id="umkmTitleInput" class="admin-form-control" placeholder="Rara Kue" required>
+                    <label>Nama UMKM / Usaha</label>
+                    <input type="text" id="muTitle" class="admin-form-control" required>
                 </div>
                 <div class="form-grid-2">
                     <div class="admin-form-group">
-                        <label>Nama Pemilik Usaha</label>
-                        <input type="text" id="umkmOwnerInput" class="admin-form-control" placeholder="Ibu Maryam" required>
+                        <label>Nama Pemilik</label>
+                        <input type="text" id="muOwner" class="admin-form-control" required>
                     </div>
                     <div class="admin-form-group">
-                        <label>Kategori Usaha</label>
-                        <select id="umkmCategoryInput" class="admin-form-control">
-                            <option value="kuliner">Kuliner</option>
+                        <label>Kategori</label>
+                        <select id="muCategory" class="admin-form-control">
+                            <option value="kuliner">Kuliner & Camilan</option>
                             <option value="kerajinan">Kerajinan Tangan</option>
-                            <option value="pertanian">Pertanian / Hasil Alam</option>
-                            <option value="jasa">Jasa & Lainnya</option>
+                            <option value="pertanian">Hasil Tani & Madu</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-grid-2">
                     <div class="admin-form-group">
-                        <label>Harga / Kisaran</label>
-                        <input type="text" id="umkmPriceInput" class="admin-form-control" placeholder="Rp 15.000 / bks" required>
+                        <label>Harga / Rentang Harga</label>
+                        <input type="text" id="muPrice" class="admin-form-control" placeholder="Contoh: Rp 15.000 / bks" required>
                     </div>
                     <div class="admin-form-group">
-                        <label>Nomor WhatsApp (Gunakan Kode Negara 62)</label>
-                        <input type="text" id="umkmWaInput" class="admin-form-control" placeholder="6281234567890" required>
+                        <label>No. WhatsApp (Format: 628xxx)</label>
+                        <input type="text" id="muWa" class="admin-form-control" placeholder="6281234567890" required>
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label>Deskripsi Produk / Usaha</label>
-                    <textarea id="umkmDescInput" class="admin-form-control" rows="3" required></textarea>
-                </div>
-                <div class="admin-form-group">
-                    <label><i class="fa-solid fa-upload"></i> Upload / Pilih Foto Produk UMKM</label>
-                    <input type="file" id="umkmImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
-                    <input type="text" id="umkmImgInput" class="admin-form-control" placeholder="assets/kegiatan1.jpg atau Upload File">
+                    <label><i class="fa-solid fa-upload"></i> Upload Foto Produk UMKM (Supabase Storage)</label>
+                    <input type="file" id="muImgFile" accept="image/*" class="admin-form-control" style="padding: 8px; margin-bottom: 8px;">
+                    <input type="text" id="muImg" class="admin-form-control" placeholder="URL Foto UMKM">
                     <div style="margin-top: 10px;">
-                        <img id="umkmImgPreview" src="" style="max-height: 100px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
+                        <img id="muImgPreview" src="" style="max-height: 120px; border-radius: 10px; display: none; border: 1px solid var(--admin-border);">
                     </div>
                 </div>
-                <button type="submit" class="btn-admin-submit" style="width: 100%; justify-content: center; margin-top: 10px;">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan UMKM
-                </button>
+                <div class="admin-form-group">
+                    <label>Deskripsi Produk UMKM</label>
+                    <textarea id="muDesc" class="admin-form-control" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn-admin-submit"><i class="fa-solid fa-floppy-disk"></i> Simpan UMKM</button>
             </form>
-        `;
-        openAdminModal('Tambah Data UMKM Baru', html);
-        bindImageUpload('umkmImgFile', 'umkmImgInput', 'umkmImgPreview');
-    };
+        `);
 
-    window.editUmkm = async function (id) {
-        const list = await window.dusunService.getUMKM();
-        const u = list.find(x => x.id === id);
-        if (!u) return;
+        bindImageUpload('muImgFile', 'muImg', 'muImgPreview');
 
-        openAddUmkmAdminModal();
-        document.getElementById('umkmId').value = u.id;
-        document.getElementById('umkmTitleInput').value = u.title;
-        document.getElementById('umkmOwnerInput').value = u.owner;
-        document.getElementById('umkmCategoryInput').value = u.category;
-        document.getElementById('umkmPriceInput').value = u.price_str;
-        document.getElementById('umkmWaInput').value = u.whatsapp;
-        document.getElementById('umkmDescInput').value = u.description;
-        document.getElementById('umkmImgInput').value = u.image_url || '';
-        document.getElementById('adminModalTitle').textContent = 'Edit Data UMKM';
-        bindImageUpload('umkmImgFile', 'umkmImgInput', 'umkmImgPreview');
-    };
+        document.getElementById('formAddUmkm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: parseInt(document.getElementById('muId').value),
+                title: document.getElementById('muTitle').value,
+                owner: document.getElementById('muOwner').value,
+                category: document.getElementById('muCategory').value,
+                price_str: document.getElementById('muPrice').value,
+                whatsapp: document.getElementById('muWa').value,
+                image_url: document.getElementById('muImg').value,
+                description: document.getElementById('muDesc').value
+            };
 
-    window.saveUmkmModal = async function (e) {
-        e.preventDefault();
-        const id = document.getElementById('umkmId').value;
-        const item = {
-            title: document.getElementById('umkmTitleInput').value,
-            owner: document.getElementById('umkmOwnerInput').value,
-            category: document.getElementById('umkmCategoryInput').value,
-            price_str: document.getElementById('umkmPriceInput').value,
-            whatsapp: document.getElementById('umkmWaInput').value,
-            description: document.getElementById('umkmDescInput').value,
-            image_url: document.getElementById('umkmImgInput').value
-        };
-        if (id) item.id = parseInt(id, 10);
-
-        try {
-            await window.dusunService.saveUMKM(item);
+            await window.dusunService.saveUMKM(payload);
+            showAdminToast('UMKM berhasil disimpan!');
             closeAdminModal();
             loadUmkmTab();
-            showAdminToast('Data UMKM berhasil disimpan!');
+        });
+    };
+
+    window.editUmkmModal = function (id, encodedObj) {
+        const u = JSON.parse(decodeURIComponent(encodedObj));
+        openAddUmkmAdminModal();
+        document.getElementById('adminModalTitle').textContent = 'Edit Data UMKM';
+        document.getElementById('muId').value = u.id;
+        document.getElementById('muTitle').value = u.title;
+        document.getElementById('muOwner').value = u.owner;
+        document.getElementById('muCategory').value = u.category;
+        document.getElementById('muPrice').value = u.price_str;
+        document.getElementById('muWa').value = u.whatsapp;
+        document.getElementById('muImg').value = u.image_url || '';
+        if (u.image_url && document.getElementById('muImgPreview')) {
+            document.getElementById('muImgPreview').src = u.image_url;
+            document.getElementById('muImgPreview').style.display = 'block';
+        }
+        document.getElementById('muDesc').value = u.description;
+    };
+
+    window.deleteUmkmItem = async function (id) {
+        if (!confirm('Hapus UMKM ini?')) return;
+        await window.dusunService.deleteUMKM(id);
+        showAdminToast('UMKM dihapus');
+        loadUmkmTab();
+    };
+
+    // F. TAB KONTAK
+    async function loadKontakTab() {
+        try {
+            const k = await window.dusunService.getKontak();
+            if (k) {
+                if (document.getElementById('kontakAddress')) document.getElementById('kontakAddress').value = k.address || '';
+                if (document.getElementById('kontakPhone')) document.getElementById('kontakPhone').value = k.phone || '';
+                if (document.getElementById('kontakEmail')) document.getElementById('kontakEmail').value = k.email || '';
+                if (document.getElementById('kontakWhatsapp')) document.getElementById('kontakWhatsapp').value = k.whatsapp || '';
+                if (document.getElementById('kontakGmapsEmbed')) document.getElementById('kontakGmapsEmbed').value = k.gmaps_embed || '';
+                if (document.getElementById('kontakInstagram')) document.getElementById('kontakInstagram').value = k.instagram || '';
+                if (document.getElementById('kontakFacebook')) document.getElementById('kontakFacebook').value = k.facebook || '';
+                if (document.getElementById('kontakYoutube')) document.getElementById('kontakYoutube').value = k.youtube || '';
+            }
         } catch (err) {
-            alert('Gagal menyimpan UMKM: ' + err.message);
+            console.error('Error loading Kontak tab:', err);
         }
-    };
-
-    window.deleteUmkm = async function (id) {
-        if (confirm('Hapus data UMKM ini?')) {
-            await window.dusunService.deleteUMKM(id);
-            loadUmkmTab();
-            showAdminToast('Data UMKM dihapus.');
-        }
-    };
-
-    // F. TAB SUPABASE SETTINGS
-    function loadSupabaseTab() {
-        const config = window.dusunService.getSupabaseConfig();
-        if (document.getElementById('supabaseUrl')) document.getElementById('supabaseUrl').value = config.url || '';
-        if (document.getElementById('supabaseKey')) document.getElementById('supabaseKey').value = config.key || '';
     }
 
-    const formSupabase = document.getElementById('formSupabase');
-    if (formSupabase) {
-        formSupabase.addEventListener('submit', (e) => {
+    const formKontak = document.getElementById('formKontak');
+    if (formKontak) {
+        formKontak.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
+            const payload = {
+                address: document.getElementById('kontakAddress').value,
+                phone: document.getElementById('kontakPhone').value,
+                email: document.getElementById('kontakEmail').value,
+                whatsapp: document.getElementById('kontakWhatsapp').value,
+                gmaps_embed: document.getElementById('kontakGmapsEmbed').value,
+                instagram: document.getElementById('kontakInstagram').value,
+                facebook: document.getElementById('kontakFacebook').value,
+                youtube: document.getElementById('kontakYoutube').value
+            };
 
-            window.dusunService.saveSupabaseConfig(url, key);
-            updateDbBadge();
-            showAdminToast('Pengaturan Supabase disimpan. Menghubungkan ke PostgreSQL...');
+            try {
+                await window.dusunService.updateKontak(payload);
+                showAdminToast('Informasi Kontak berhasil diperbarui!');
+            } catch (err) {
+                alert('Gagal menyimpan kontak: ' + err.message);
+            }
         });
     }
 
-    // Toast Notification Generator
-    function showAdminToast(message) {
-        let container = document.getElementById('adminToastContainer');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'adminToastContainer';
-            container.style.cssText = 'position: fixed; bottom: 30px; right: 30px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;';
-            document.body.appendChild(container);
-        }
-
-        const toast = document.createElement('div');
-        toast.style.cssText = 'background: #10b981; color: #fff; padding: 14px 20px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px;';
-        toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transition = '0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
-    }
-
-    // Initial load check
+    // Initial Session & Data Load
     checkSession();
 });
